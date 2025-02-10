@@ -15,12 +15,15 @@ datasource db {
 
 
 model User {
-  id        String  @id @default(uuid())
-  email     String  @unique
-  password  String
-  role      String  // "pegawai" | "turis"
-  trips     Trip[]  @relation("TurisTrips") // Hanya referensi, validasi ada di service
+  id         String  @id @default(uuid())
+  email      String  @unique
+  password   String
+  role       String  // "pegawai" | "turis"
+  isVerified Boolean @default(false)
+  phone      String  @unique
+  trips      Trip[]  @relation("TurisTrips") // Turis memiliki banyak perjalanan
 }
+
 
 model Trip {
   id         String @id @default(uuid())
