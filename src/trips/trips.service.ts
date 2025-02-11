@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTripDto } from '../auth/dto/create-trip.dto';
 import { UpdateTripDto } from '../auth/dto/update-trip.dto';
+import { create } from 'domain';
 
 @Injectable()
 export class TripsService {
@@ -30,6 +31,23 @@ export class TripsService {
     }
     if (user.role !== 'turis') {
         throw new ForbiddenException(`User with ID ${createTripDto.turisId} is not a turis.`);
+    }
+
+    // makesure trip not conflict
+    const conflictingTrip = await this.prisma.trip.findFirst({
+        where: {
+            turisId: createTripDto.turisId,
+            OR: [
+                {
+                    startDate: { lte: createTripDto.endDate },
+                    endDate: { gte: createTripDto.startDate },
+                },
+            ],
+        },
+    });
+
+    if (conflictingTrip) {
+        throw new BadRequestException(`Trip conflicts with an existing trip (ID: ${conflictingTrip.id}) from ${conflictingTrip.startDate} to ${conflictingTrip.endDate}.`);
     }
 
     return this.prisma.trip.create({
