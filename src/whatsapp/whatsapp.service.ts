@@ -13,9 +13,7 @@ export class WhatsAppService {
     );
   }
 
-  // Fungsi untuk mengirim WhatsApp message
   async sendVerification(phone: string, token: string) {
-    // Pastikan phone bukan null atau kosong
     if (!phone || phone === '') {
       throw new Error('Phone number is required for sending verification.');
     }
@@ -23,18 +21,18 @@ export class WhatsAppService {
     const verifyUrl = `${this.configService.get<string>('APP_URL')}/auth/verify?token=${token}`;
 
     return this.client.messages.create({
-      from: this.configService.get<string>('TWILIO_WHATSAPP_NUMBER'),
-      to: `whatsapp:${phone}`,  // Pastikan nomor dalam format yang benar
-      body: `Mlaku mulu: Klik berikut ini untuk verifikasi akun anda: ${verifyUrl}`,
+      from: `whatsapp:${this.configService.get<string>('TWILIO_WHATSAPP_NUMBER')}`,
+      to: `whatsapp:${phone}`, // Ensure the correct format
+      body: `Mlaku Mulu: Click the link below to verify your account:\n\n${verifyUrl}`,
     });
   }
 
   async sendNotification(phone: string, message: string) {
     try {
       return await this.client.messages.create({
-        from: this.configService.get<string>('TWILIO_WHATSAPP_NUMBER'),
+        from: `whatsapp:${this.configService.get<string>('TWILIO_WHATSAPP_NUMBER')}`,
         to: `whatsapp:${phone}`,
-        body: message,
+        body: `Mlaku Mulu Notification:\n\n${message}`,
       });
     } catch (error) {
       console.error('Failed to send WhatsApp notification:', error);
