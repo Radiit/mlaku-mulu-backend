@@ -5,7 +5,6 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CreateTripDto } from '../auth/dto/create-trip.dto';
 import { UpdateTripDto } from '../auth/dto/update-trip.dto';
-import { Message } from 'twilio/lib/twiml/MessagingResponse';
 
 @Controller('trips')
 @UseGuards(JwtAuthGuard, RolesGuard)
