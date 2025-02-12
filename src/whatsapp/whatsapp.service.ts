@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import * as twilio from 'twilio';
+import { measureMemory } from "vm";
 
 @Injectable()
 export class WhatsAppService {
@@ -21,5 +22,17 @@ export class WhatsAppService {
             to: `whatsapp:${phone}`,
             body: `Mlaku mulu: Klink berikut ini untuk verifikasi akun anda: ${verifyUrl}`,
         });
+    }
+
+    async sendNotification(phone: string, message: string) {
+        try {
+            return await this.client.messages.create({
+                from: this.configService.get<string>('TWILIO_WHATSAPP_NUMBER'),
+                to: `whatsapp:${phone}`,
+                body: message,
+            });
+        } catch (error) {
+            console.error('Failed to send WhatsApp notification:', error);
+        }
     }
 }
