@@ -76,14 +76,6 @@ jobs:
       - name: Debug: List files before deployment
         run: ls -la
 
-      - name: Cleanup Old Deployment (Avoid Conflict)
-        run: |
-          az webapp stop --name mlaku-mulu-backend --resource-group mlaku-rg
-          az webapp delete --name mlaku-mulu-backend --resource-group mlaku-rg --keep-empty-app
-
-      - name: Debug Azure CLI
-        run: az account show
-
       - name: Login to Azure
         uses: azure/login@v2
         with:
