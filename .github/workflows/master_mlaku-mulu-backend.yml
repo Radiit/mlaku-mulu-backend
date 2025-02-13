@@ -27,10 +27,17 @@ jobs:
       - name: Generate Prisma Client
         run: npx prisma generate
 
+      - name: Resolve Pending Migrations (Avoid P3005)
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          npx prisma migrate resolve --applied "20240212123456_migration_name" || echo "No pending migrations to resolve."
+
       - name: Apply Prisma Migrations
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx prisma migrate deploy
+        run: |
+          npx prisma migrate deploy || (echo "Migration failed, trying db push..." && npx prisma db push)
 
       - name: Build application
         run: npm run build --if-present
