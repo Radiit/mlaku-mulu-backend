@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read # This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -57,8 +57,11 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
-      - name: Install dependencies (optional, jika belum ada node_modules)
+      - name: Install dependencies (pastikan prisma terinstal)
         run: npm install
+
+      - name: Install Prisma CLI
+        run: npm install -g prisma
 
       - name: Generate Prisma Client
         run: npx prisma generate
@@ -80,6 +83,9 @@ jobs:
           app-name: 'mlaku-mulu-backend'
           slot-name: 'Production'
           package: .
+
+      - name: Restart Azure Web App
+        run: az webapp restart --name mlaku-mulu-backend --resource-group mlaku-rg
 
       - name: Restart Azure Web App
         run: az webapp restart --name mlaku-mulu-backend --resource-group mlaku-rg
