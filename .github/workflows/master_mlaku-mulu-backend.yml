@@ -48,13 +48,9 @@ jobs:
       - name: Prepare Deployment Package
         run: |
           mkdir deploy-package
-          cp -R . deploy-package
-          rm -rf deploy-package/node_modules
-          rm -rf deploy-package/.git
-          rm -rf deploy-package/.github
-          rm -rf deploy-package/.next
-          rm -rf deploy-package/prisma/migrations
+          rsync -av --progress ./ deploy-package --exclude deploy-package --exclude node_modules --exclude .git --exclude .github --exclude .next --exclude prisma/migrations
           zip -r release.zip deploy-package
+
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
