@@ -28,10 +28,10 @@ model User {
 
 
 model Trip {
-  id         String @id @default(uuid())
-  turisId    String
-  turis      User   @relation("TurisTrips", fields: [turisId], references: [id], onDelete: Cascade)
-  startDate  DateTime
-  endDate    DateTime
-  destination String
+  id          String   @id @default(uuid())
+  turisId     String
+  turis       User     @relation("TurisTrips", fields: [turisId], references: [id], onDelete: Cascade)
+  startDate   DateTime
+  endDate     DateTime
+  destination Json     
 }

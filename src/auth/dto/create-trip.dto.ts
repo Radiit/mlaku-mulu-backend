@@ -1,4 +1,4 @@
-import { IsDateString, IsString } from "class-validator";
+import { IsDateString, IsString, IsOptional, ValidateIf, IsObject } from "class-validator";
 
 export class CreateTripDto {
     @IsString()
@@ -10,6 +10,11 @@ export class CreateTripDto {
     @IsDateString()
     endDate: string;
 
+    @ValidateIf((o) => typeof o.destination === 'string')
     @IsString()
-    destination: string;
+    destination?: string | Record<string, unknown>;
+
+    @ValidateIf((o) => typeof o.destination === 'object')
+    @IsObject()
+    destinationObj?: Record<string, unknown>;
 }
