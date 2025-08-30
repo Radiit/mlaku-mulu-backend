@@ -47,20 +47,26 @@ jobs:
             exit 1
           fi
 
+      - name: Clean up existing Docker images
+        run: |
+          echo "🧹 Cleaning up existing Docker images..."
+          docker system prune -f
+          docker images | grep -E "(${{ env.IMAGE_NAME }}|none)" | awk '{print $3}' | xargs -r docker rmi -f || true
+          echo "✅ Cleanup completed"
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          push: false
-          tags: ${{ env.IMAGE_NAME }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-          platforms: linux/amd64
-          build-args: |
-            BUILDKIT_INLINE_CACHE=1
+      - name: Build Docker image with force
+        run: |
+          echo "🔨 Building Docker image with force..."
+          docker build --no-cache --force-rm -t ${{ env.IMAGE_NAME }}:latest .
+          if [ $? -eq 0 ]; then
+            echo "✅ Docker build completed successfully"
+          else
+            echo "❌ Docker build failed"
+            exit 1
+          fi
 
       - name: List all Docker images
         run: |
@@ -84,6 +90,7 @@ jobs:
             docker images | grep -i mlaku || echo "No similar images found"
             echo "🔍 Recent Docker build history:"
             docker history ${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "No build history found"
+            echo "❌ Build verification failed - exiting"
             exit 1
           fi
 
