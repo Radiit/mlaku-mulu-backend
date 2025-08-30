@@ -13,25 +13,25 @@ export class UserController {
     constructor(private readonly userService: UsersService) {}
 
     @Get()
-    @Roles('pegawai')
+    @Roles('pegawai', 'owner')
     async findAllUsers(@Query() paginationDto: PaginationDto) {
         return await this.userService.findAllUsers(paginationDto);
     }
 
     @Get(':id')
-    @Roles('pegawai')
+    @Roles('pegawai', 'owner')
     async findOneUser(@Param('id') id: string) {
         return await this.userService.findSpecificUser(id);
     }
 
     @Patch(':id')
-    @Roles('pegawai')
+    @Roles('pegawai', 'owner')
     async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
         return await this.userService.updateUser(id, updateUserDto);
     }
 
     @Delete(':id')
-    @Roles('pegawai')
+    @Roles('pegawai', 'owner')
     async remove(@Param('id') id: string) {
         return await this.userService.removeUser(id);
     }

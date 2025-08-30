@@ -20,7 +20,7 @@ model User {
   id         String  @id @default(uuid())
   email      String  @unique
   password   String
-  role       String  // "pegawai" | "turis"
+  role       String  // "owner" | "pegawai" | "turis"
   isVerified Boolean @default(false)
   phone      String  @unique
   verificationToken String?
