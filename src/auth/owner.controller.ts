@@ -2,10 +2,9 @@ import {
   Controller, 
   Post, 
   Get, 
-  Put, 
-  Delete, 
   Body, 
-  Param, 
+  Param,
+  Delete,
   Query, 
   UseGuards, 
   Request,
@@ -14,8 +13,7 @@ import {
 } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { RegisterOwnerDto } from './dto/register-owner.dto';
-import { AssignRoleDto } from './dto/assign-role.dto';
-import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { ResendOwnerOtpDto } from './dto/resend-owner-otp.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { OwnerRoleGuard } from './guards/owner-role.guard';
 import { OwnerRole } from '../common/decorators/owner-role.decorator';
@@ -29,25 +27,16 @@ export class OwnerController {
     return this.ownerService.registerOwner(registerOwnerDto);
   }
 
-  @Post('assign-role')
-  @UseGuards(JwtAuthGuard, OwnerRoleGuard)
-  @OwnerRole()
-  async assignRole(
-    @Body() assignRoleDto: AssignRoleDto,
-    @Request() req
-  ) {
-    return this.ownerService.assignRole(assignRoleDto, req.user.id);
+  @Post('resend-otp')
+  async resendOwnerOtp(@Body() resendOwnerOtpDto: ResendOwnerOtpDto) {
+    return this.ownerService.resendOwnerOtp(resendOwnerOtpDto);
   }
 
-  @Put('users/:id/role')
+  @Get('dashboard/stats')
   @UseGuards(JwtAuthGuard, OwnerRoleGuard)
   @OwnerRole()
-  async updateUserRole(
-    @Param('id') userId: string,
-    @Body() updateRoleDto: UpdateUserRoleDto,
-    @Request() req
-  ) {
-    return this.ownerService.updateUserRole(userId, updateRoleDto, req.user.id);
+  async getDashboardStats(@Request() req) {
+    return this.ownerService.getOwnerDashboardStats(req.user.id);
   }
 
   @Get('users')

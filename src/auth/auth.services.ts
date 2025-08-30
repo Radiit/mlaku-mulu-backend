@@ -14,35 +14,22 @@ export class AuthService {
     private readonly emailService: EmailService,
   ) {}
 
-  async register(email: string, password: string, phone: string, role: 'pegawai' | 'turis') {
-    if (!phone || phone === '') {
-      throw new common.BadRequestException('Phone number is required and cannot be empty.');
-    }
-
-    const existingUser = await this.prisma.user.findUnique({ where: { email } });
-    if (existingUser) {
-      throw new common.ConflictException('Email already registered');
-    }
-
-    const existingPhone = await this.prisma.user.findUnique({ where: { phone } });
-    if (existingPhone) {
-      throw new common.ConflictException('Phone number already registered');
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
+  async registerOwner(email: string, password: string, phone: string, role: string) {
     try {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
       const user = await this.prisma.user.create({
         data: {
           email,
           password: hashedPassword,
-          phone,  
+          phone,
           role,
           isVerified: false, 
         },
       });
 
-      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      // Generate a more robust 6-character alphanumeric OTP
+      const otp = this.generateOtp();
       
       await this.prisma.user.update({
         where: { id: user.id },
@@ -78,17 +65,97 @@ export class AuthService {
     }
   }
 
+  async register(email: string, password: string, phone: string, role: 'pegawai' | 'turis') {
+    if (!phone || phone === '') {
+      throw new common.BadRequestException('Phone number is required and cannot be empty.');
+    }
+
+    const existingUser = await this.prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      throw new common.ConflictException('Email already registered');
+    }
+
+    const existingPhone = await this.prisma.user.findUnique({ where: { phone } });
+    if (existingPhone) {
+      throw new common.ConflictException('Phone number already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    try {
+      const user = await this.prisma.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          phone,  
+          role,
+          isVerified: false, 
+        },
+      });
+
+      // Generate a more robust 6-character alphanumeric OTP
+      const otp = this.generateOtp();
+      
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: { 
+          verificationToken: otp,
+          tokenExpiry: new Date(Date.now() + 10 * 60 * 1000) // 10 menit expiry
+        }
+      });
+
+      await this.emailService.sendOtpEmail(email, otp);
+      
+      return ResponseHelper.created(
+        {
+          id: user.id,
+          email: user.email,
+          role: user.role,
+          isVerified: user.isVerified,
+          phone: user.phone
+        },
+        'User registered successfully. Please check your email for OTP verification.'
+      );
+    } catch (error) {
+      if (error.code === 'P2002') {
+        if (error.meta?.target?.includes('email')) {
+          throw new common.ConflictException('Email already registered');
+        }
+        if (error.meta?.target?.includes('phone')) {
+          throw new common.ConflictException('Phone number already registered');
+        }
+        throw new common.ConflictException('User with this information already exists');
+      }
+      throw error;
+    }
+  }
+
+  // Helper method to generate consistent OTP format
+  private generateOtp(): string {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = '';
+    for (let i = 0; i < 6; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return result;
+  }
+
   async verifyOtp(email: string, otp: string) {
     try {
+      // Normalize OTP input (remove spaces, convert to uppercase)
+      const normalizedOtp = otp.replace(/\s/g, '').toUpperCase();
+      
       const user = await this.prisma.user.findFirst({ 
         where: { 
           email: email,
-          verificationToken: otp,
+          verificationToken: normalizedOtp,
           tokenExpiry: { gt: new Date() }
         } 
       });
 
       if (!user) {
+        // Log for debugging
+        console.log(`OTP verification failed for ${email}: OTP ${normalizedOtp} not found or expired`);
         throw new common.UnauthorizedException('Invalid or expired OTP.');
       }
 
@@ -106,7 +173,12 @@ export class AuthService {
       });
 
       return ResponseHelper.success(
-        { userId: user.id, email: user.email },
+        { 
+          userId: user.id, 
+          email: user.email, 
+          role: user.role,
+          message: `${user.role.charAt(0).toUpperCase() + user.role.slice(1)} verified successfully. You can now login.`
+        },
         'Email verified successfully. You can now login.'
       );
     } catch (error) {
@@ -128,7 +200,8 @@ export class AuthService {
       throw new common.BadRequestException('User is already verified.');
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    // Generate new OTP using the same format
+    const otp = this.generateOtp();
     
     await this.prisma.user.update({
       where: { id: user.id },

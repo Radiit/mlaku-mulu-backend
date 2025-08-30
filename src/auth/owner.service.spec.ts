@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, NotFoundException, ConflictException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
 import { OwnerService } from './owner.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../email/email.service';
 import { ResponseHelper } from '../common/utils/response';
 
 // Mock bcrypt
@@ -19,7 +20,7 @@ describe('OwnerService', () => {
     password: 'hashedPassword',
     phone: '+1234567890',
     role: 'owner' as const,
-    isVerified: true,
+    isVerified: false, // Now false because needs OTP verification
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -47,12 +48,20 @@ describe('OwnerService', () => {
       },
     };
 
+    const mockEmailService = {
+      sendOtpEmail: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         OwnerService,
         {
           provide: PrismaService,
           useValue: mockPrismaService,
+        },
+        {
+          provide: EmailService,
+          useValue: mockEmailService,
         },
       ],
     }).compile();
@@ -90,11 +99,12 @@ describe('OwnerService', () => {
             id: mockOwner.id,
             email: mockOwner.email,
             role: mockOwner.role,
-            isVerified: mockOwner.isVerified,
+            isVerified: false, // Now false because needs OTP verification
             phone: mockOwner.phone,
             name: 'John Owner',
+            message: 'Owner registered successfully. Please check your email for OTP verification.',
           },
-          'Owner registered successfully'
+          'Owner registered successfully. Please verify your email with OTP.'
         )
       );
 
@@ -105,7 +115,9 @@ describe('OwnerService', () => {
           password: 'hashedPassword',
           phone: '+1234567890',
           role: 'owner',
-          isVerified: true,
+          isVerified: false,
+          verificationToken: expect.any(String),
+          tokenExpiry: expect.any(Date),
         },
       });
     });
@@ -224,6 +236,131 @@ describe('OwnerService', () => {
 
       await expect(service.getAllUsers('pegawai-123', 1, 10))
         .rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('verifyOwnerOtp', () => {
+    it('should verify owner OTP successfully', async () => {
+      const verifyOtpDto = {
+        email: 'owner@example.com',
+        otp: 'ABC123',
+      };
+
+      const mockOwnerWithToken = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: false,
+        verificationToken: 'ABC123',
+        tokenExpiry: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes from now
+      };
+
+      const verifiedOwner = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: true,
+        phone: '+1234567890',
+      };
+
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockOwnerWithToken);
+      (prismaService.user.update as jest.Mock).mockResolvedValue(verifiedOwner);
+
+      const result = await service.verifyOwnerOtp(verifyOtpDto);
+
+      expect(result).toEqual(
+        ResponseHelper.success(
+          verifiedOwner,
+          'Owner verified successfully. You can now login.'
+        )
+      );
+    });
+
+    it('should throw BadRequestException when OTP is invalid', async () => {
+      const verifyOtpDto = {
+        email: 'owner@example.com',
+        otp: 'WRONG123',
+      };
+
+      const mockOwnerWithToken = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: false,
+        verificationToken: 'ABC123',
+        tokenExpiry: new Date(Date.now() + 5 * 60 * 1000),
+      };
+
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockOwnerWithToken);
+
+      await expect(service.verifyOwnerOtp(verifyOtpDto))
+        .rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw BadRequestException when OTP is expired', async () => {
+      const verifyOtpDto = {
+        email: 'owner@example.com',
+        otp: 'ABC123',
+      };
+
+      const mockOwnerWithExpiredToken = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: false,
+        verificationToken: 'ABC123',
+        tokenExpiry: new Date(Date.now() - 5 * 60 * 1000), // 5 minutes ago
+      };
+
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockOwnerWithExpiredToken);
+
+      await expect(service.verifyOwnerOtp(verifyOtpDto))
+        .rejects.toThrow(BadRequestException);
+    });
+  });
+
+  describe('resendOwnerOtp', () => {
+    it('should resend OTP successfully', async () => {
+      const resendOtpDto = {
+        email: 'owner@example.com',
+      };
+
+      const mockOwner = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: false,
+      };
+
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockOwner);
+      (prismaService.user.update as jest.Mock).mockResolvedValue(mockOwner);
+
+      const result = await service.resendOwnerOtp(resendOtpDto);
+
+      expect(result).toEqual(
+        ResponseHelper.success(
+          { message: 'New OTP sent to your email' },
+          'New OTP sent successfully'
+        )
+      );
+    });
+
+    it('should throw BadRequestException when owner is already verified', async () => {
+      const resendOtpDto = {
+        email: 'owner@example.com',
+      };
+
+      const mockVerifiedOwner = {
+        id: 'owner-123',
+        email: 'owner@example.com',
+        role: 'owner',
+        isVerified: true,
+      };
+
+      (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockVerifiedOwner);
+
+      await expect(service.resendOwnerOtp(resendOtpDto))
+        .rejects.toThrow(BadRequestException);
     });
   });
 
