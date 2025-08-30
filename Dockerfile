@@ -4,6 +4,8 @@ FROM node:20-slim AS builder
 # Install OpenSSL and other build dependencies
 RUN apt-get update && apt-get install -y \
     openssl \
+    libssl-dev \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 # Set working directory
@@ -29,8 +31,13 @@ RUN npm run build
 # Production stage
 FROM node:20-slim AS production
 
-# Install dumb-init for proper signal handling
-RUN apt-get update && apt-get install -y dumb-init && rm -rf /var/lib/apt/lists/*
+# Install dumb-init and OpenSSL for production
+RUN apt-get update && apt-get install -y \
+    dumb-init \
+    openssl \
+    libssl3 \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
 RUN groupadd -r nodejs && useradd -r -g nodejs nestjs
