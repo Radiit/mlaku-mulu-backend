@@ -8,9 +8,6 @@ on:
   workflow_dispatch:
 
 env:
-  VPS_HOST: 43.134.87.90
-  VPS_USER: root
-  VPS_PATH: ~/mlaka-mulu
   CONTAINER_NAME: mlaku-mulu-backend
   IMAGE_NAME: mlaku-mulu-backend
 
@@ -67,7 +64,7 @@ jobs:
       - name: Add VPS to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to VPS using password
         run: |
@@ -75,11 +72,11 @@ jobs:
           sudo apt-get install -y sshpass
           
           # Copy Docker image to VPS using password
-          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar.gz ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_PATH }}/
+          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar.gz ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
           
           # Deploy on VPS using password
-          sshpass -p '${{ secrets.VPS_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'EOF'
-            cd ${{ env.VPS_PATH }}
+          sshpass -p '${{ secrets.VPS_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            cd ${{ secrets.VPS_PATH }}
             
             # Load Docker image
             docker load < image.tar.gz
@@ -126,7 +123,7 @@ jobs:
         run: |
           echo "Waiting for deployment to be ready..."
           sleep 30
-          if curl -f http://${{ env.VPS_HOST }}:8086/health; then
+          if curl -f http://${{ secrets.VPS_HOST }}:8086/health; then
             echo "✅ VPS deployment verified successfully!"
           else
             echo "❌ VPS deployment verification failed"
