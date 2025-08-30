@@ -23,6 +23,8 @@ model User {
   role       String  // "pegawai" | "turis"
   isVerified Boolean @default(false)
   phone      String  @unique
+  verificationToken String?
+  tokenExpiry       DateTime?
   trips      Trip[]  @relation("TurisTrips") // Turis memiliki banyak perjalanan
 }
 

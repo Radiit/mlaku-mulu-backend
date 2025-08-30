@@ -2,14 +2,14 @@ import * as common from "@nestjs/common";
 import * as jwt from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from 'bcrypt';
-import { WhatsAppService } from '../whatsapp/whatsapp.service'; // Pastikan WhatsAppService diimport
+import { EmailService } from '../email/email.service';
 
 @common.Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: jwt.JwtService,
-    private whatsappService: WhatsAppService, // Injeksi WhatsAppService
+    private emailService: EmailService,
   ) {}
 
   // Fungsi registrasi pengguna
@@ -22,7 +22,7 @@ export class AuthService {
     // Periksa apakah email atau nomor telepon sudah terdaftar
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
-      throw new common.UnauthorizedException('Email sudah terdaftar');
+      throw new common.UnauthorizedException('Email already registered');
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -38,23 +38,35 @@ export class AuthService {
       },
     });
 
-    // Generate token untuk verifikasi
-    const token = this.jwtService.sign({ email, phone });
-
-    // Kirim verifikasi WhatsApp
-    const message = `Hi ${email}!, your verification link is: \n\n${process.env.APP_URL}/auth/verify?token=${token}`;
-    await this.whatsappService.sendVerification(user.phone, message); // Pastikan kamu punya sendVerification di WhatsAppService
+    // Generate OTP untuk verifikasi
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
     
-    return { message: 'User registered successfully. Please check your WhatsApp to verify your account.' };
+    // Simpan OTP ke database (bisa di temporary table atau user table)
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { 
+        verificationToken: otp,
+        tokenExpiry: new Date(Date.now() + 10 * 60 * 1000) // 10 menit expiry
+      }
+    });
+
+    // Kirim verifikasi email
+    await this.emailService.sendOtpEmail(email, otp);
+    
+    return { message: 'User registered successfully. Please check your email for OTP verification.' };
   }
 
   // Verifikasi nomor telepon
   async verifyPhone(token: string) {
     try {
-      const payload = this.jwtService.verify(token); // Pastikan token valid
-      const user = await this.prisma.user.findUnique({ where: { email: payload.email } });
+      const user = await this.prisma.user.findFirst({ 
+        where: { 
+          verificationToken: token,
+          tokenExpiry: { gt: new Date() }
+        } 
+      });
 
-      if (!user) throw new common.UnauthorizedException('Invalid token.');
+      if (!user) throw new common.UnauthorizedException('Invalid or expired OTP.');
 
       if (user.isVerified) {
         throw new common.UnauthorizedException('User is already verified.');
@@ -62,13 +74,17 @@ export class AuthService {
 
       // Update status pengguna menjadi terverifikasi
       await this.prisma.user.update({
-        where: { email: payload.email },
-        data: { isVerified: true },
+        where: { id: user.id },
+        data: { 
+          isVerified: true,
+          verificationToken: null,
+          tokenExpiry: null
+        },
       });
 
       return { message: 'Phone verified successfully. You can now login.' };
     } catch (error) {
-      throw new common.UnauthorizedException('Invalid or expired token.');
+      throw new common.UnauthorizedException('Invalid or expired OTP.');
     }
   }
 
