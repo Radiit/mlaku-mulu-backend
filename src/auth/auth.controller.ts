@@ -1,7 +1,12 @@
-import { Controller, Get, Query, Post, Body } from '@nestjs/common';
+import { Controller, Get, Query, Post, Body, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.services';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { VerifyOtpDto } from './dto/verify-otp.dto';
+import { ResendOtpDto } from './dto/resend-otp.dto';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { LogoutDto } from './dto/logout.dto';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -13,7 +18,7 @@ export class AuthController {
       registerDto.email,
       registerDto.password,
       registerDto.phone,
-      registerDto.role
+      'turis' // Default role for general register
     );
   }
 
@@ -37,14 +42,31 @@ export class AuthController {
     );
   }
 
-  @Get('verify')
-  async verifyPhone(@Query('token') token: string) {
-    return this.authService.verifyPhone(token);
+  @Post('verify-otp')
+  async verifyOtp(@Body() verifyOtpDto: VerifyOtpDto) {
+    return this.authService.verifyOtp(verifyOtpDto.email, verifyOtpDto.otp);
+  }
+
+  @Post('resend-otp')
+  async resendOtp(@Body() resendOtpDto: ResendOtpDto) {
+    return this.authService.resendOtp(resendOtpDto.email);
   }
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto.email, loginDto.password);
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtRefreshGuard)
+  async refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() req: any) {
+    return this.authService.refreshAccessToken(req.user.id, refreshTokenDto.refreshToken);
+  }
+
+  @Post('logout')
+  @UseGuards(JwtRefreshGuard)
+  async logout(@Body() logoutDto: LogoutDto, @Req() req: any) {
+    return this.authService.logout(req.user.id);
   }
 }
 

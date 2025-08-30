@@ -25,6 +25,8 @@ model User {
   phone      String  @unique
   verificationToken String?
   tokenExpiry       DateTime?
+  refreshToken      String?  @unique
+  refreshTokenExpiry DateTime?
   trips      Trip[]  @relation("TurisTrips") // Turis memiliki banyak perjalanan
 }
 

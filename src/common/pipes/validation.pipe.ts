@@ -25,9 +25,9 @@ export class ValidationPipe implements PipeTransform<any> {
         value: error.value,
       }));
 
-      throw new BadRequestException(
-        ResponseHelper.badRequest('Validation failed', validationErrors)
-      );
+      // Throw BadRequestException with validation errors
+      const errorResponse = ResponseHelper.badRequest('Validation failed', validationErrors);
+      throw new BadRequestException(errorResponse);
     }
 
     return value;
