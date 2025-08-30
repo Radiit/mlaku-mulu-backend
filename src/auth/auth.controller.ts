@@ -7,6 +7,7 @@ import { ResendOtpDto } from './dto/resend-otp.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { LogoutDto } from './dto/logout.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -18,7 +19,7 @@ export class AuthController {
       registerDto.email,
       registerDto.password,
       registerDto.phone,
-      'turis' // Default role for general register
+      'turis' 
     );
   }
 
@@ -60,12 +61,12 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(JwtRefreshGuard)
   async refreshToken(@Body() refreshTokenDto: RefreshTokenDto, @Req() req: any) {
-    return this.authService.refreshAccessToken(req.user.id, refreshTokenDto.refreshToken);
+    return this.authService.refreshAccessToken(refreshTokenDto.refreshToken);
   }
 
   @Post('logout')
-  @UseGuards(JwtRefreshGuard)
-  async logout(@Body() logoutDto: LogoutDto, @Req() req: any) {
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: any) {
     return this.authService.logout(req.user.id);
   }
 }

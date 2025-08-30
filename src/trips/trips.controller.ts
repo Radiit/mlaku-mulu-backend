@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Request, Query } from '@nestjs/common';
 import { TripsService } from './trips.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { CreateTripDto } from '../auth/dto/create-trip.dto';
+import { CreateTripTurisDto } from '../auth/dto/create-trip-turis.dto';
 import { UpdateTripDto } from '../auth/dto/update-trip.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { ResponseHelper } from '../common/utils/response';
 
 @Controller('trips')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -13,52 +16,70 @@ export class TripsController {
 
   @Get()
   @Roles('pegawai')
-  async findAllTrips() {
-      const trips = await this.tripsService.findAllTrips();
-      return {
-        success: true,
-        message: "Trip retrieved successfully",
-        data:trips 
-      };
+  async findAllTrips(@Query() paginationDto: PaginationDto) {
+      return await this.tripsService.findAllTrips(paginationDto);
   }
   
 
   @Get('me')
-  async findMyTrips(@Request() req) {
-    return {
-      success: true,
-      message: "Your trips retrieved successfully",
-      data: await this.tripsService.findTripByUser(req.user.userId),
-    };
+  async findMyTrips(@Request() req, @Query() paginationDto: PaginationDto) {
+    return await this.tripsService.findTripByUser(req.user.userId, paginationDto);
   }
 
-  @Post()
+  @Post('pegawai')
   @Roles('pegawai')
-  async createTrip(@Body() createTripDto: CreateTripDto) {
-    return {
-      success: true,
-      message: "Trip created successfully",
-      data: await this.tripsService.createTrip(createTripDto.turisId, createTripDto),
-    };
+  async createTripPegawai(@Body() createTripDto: CreateTripDto) {
+    const trip = await this.tripsService.createTrip(createTripDto.turisId, createTripDto);
+    return ResponseHelper.created(
+      trip,
+      'Trip created successfully by pegawai'
+    );
   }
 
-  @Patch(':id')
-  @Roles('pegawai')
-  async updateTrip(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
-    return {
-      success: true,
-      message: "Trip updated successfully",
-      data: await this.tripsService.updateTrip(id, updateTripDto),
-    };
+  @Post('turis')
+  async createTripTuris(@Body() createTripDto: CreateTripTurisDto, @Request() req) {
+    const trip = await this.tripsService.createTripTuris(req.user.id, createTripDto);
+    return ResponseHelper.created(
+      trip,
+      'Trip created successfully by turis'
+    );
   }
 
-  @Delete(':id')
+  @Patch('pegawai/:id')
   @Roles('pegawai')
-  async removeTrip(@Param('id') id: string) {
-    return {
-      success: true,
-      message: "Trip deleted successfully",
-      data: await this.tripsService.removeTrip(id),
-    };
+  async updateTripPegawai(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
+    const trip = await this.tripsService.updateTripPegawai(id, updateTripDto);
+    return ResponseHelper.success(
+      trip,
+      'Trip updated successfully by pegawai'
+    );
+  }
+
+  @Patch('turis/:id')
+  async updateTripTuris(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Request() req) {
+    const trip = await this.tripsService.updateTripTuris(id, updateTripDto, req.user.id);
+    return ResponseHelper.success(
+      trip,
+      'Trip updated successfully by turis'
+    );
+  }
+
+  @Delete('pegawai/:id')
+  @Roles('pegawai')
+  async removeTripPegawai(@Param('id') id: string) {
+    const result = await this.tripsService.removeTripPegawai(id);
+    return ResponseHelper.success(
+      result,
+      'Trip deleted successfully by pegawai'
+    );
+  }
+
+  @Delete('turis/:id')
+  async removeTripTuris(@Param('id') id: string, @Request() req) {
+    const result = await this.tripsService.removeTripTuris(id, req.user.id);
+    return ResponseHelper.success(
+      result,
+      'Trip deleted successfully by turis'
+    );
   }
 }

@@ -1,7 +1,2 @@
-import { IsString, IsNotEmpty } from 'class-validator';
-
-export class LogoutDto {
-  @IsString({ message: 'Refresh token must be a string' })
-  @IsNotEmpty({ message: 'Refresh token is required' })
-  refreshToken: string;
-} 
+// No body required for logout - only Bearer token needed
+export class LogoutDto {} 
