@@ -72,6 +72,6 @@ EXPOSE 8086
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
 
-# Start the application
-CMD ["node", "dist/src/main"]
+# Use npm script for automatic database setup and startup
+CMD ["npm", "run", "start:with-db"]
     

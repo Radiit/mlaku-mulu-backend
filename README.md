@@ -1,99 +1,297 @@
+# 🚀 MLaku Mulu Backend
+
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
+  <img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" />
+  <br>
+  <strong>Modern Travel Management System Backend</strong>
 </p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
+<p align="center">
+  <a href="https://nestjs.com/" target="blank">NestJS</a> framework for building efficient and scalable server-side applications.
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+## 📚 **API Documentation**
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+<div align="center">
+  
+  ### 🔗 **[View Complete API Documentation](https://documenter.getpostman.com/view/39299483/2sB3Hhs2Z3)**
+  
+  [![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)](https://documenter.getpostman.com/view/39299483/2sB3Hhs2Z3)
+  
+  **Complete API reference with examples, request/response schemas, and testing endpoints**
+  
+</div>
 
-## Project setup
+---
 
-```bash
-$ npm install
+## 🎯 **Project Overview**
+
+MLaku Mulu is a comprehensive travel management system built with **NestJS** and **Prisma ORM**. The system provides role-based access control for travel agencies, staff, and travelers to manage trips, bookings, and user accounts efficiently.
+
+### ✨ **Key Features**
+
+- 🔐 **JWT Authentication** with refresh tokens
+- 👥 **Role-Based Access Control** (Owner, Staff, Traveler)
+- 🗺️ **Trip Management** with booking system
+- 📧 **Email Verification** with OTP system
+- 🗄️ **PostgreSQL Database** with Prisma ORM and Neon
+- 🐳 **Docker Support** for easy deployment
+- 🚀 **Auto-Migration & Seeding** on startup
+
+## 🏗️ **Architecture**
+
+### **Technology Stack**
+
+- **Framework**: [NestJS](https://nestjs.com/) v11
+- **Database**: PostgreSQL with [Prisma](https://www.prisma.io/) v6
+- **Authentication**: JWT with Passport
+- **Email**: Nodemailer with Gmail SMTP
+- **Container**: Docker with multi-stage builds
+- **Language**: TypeScript
+
+### **Database Schema**
+
+The system uses three main models:
+
+- **User**: Authentication and role management
+- **Trip**: Travel itinerary management
+- **Booking**: Trip reservation system
+
+## 🚀 **Quick Start**
+
+### **Prerequisites**
+
+- Node.js 20+
+- PostgreSQL database
+- Docker (optional)
+
+### **Environment Variables**
+
+Create a `.env` file with the following variables:
+
+```env
+# Database
+DATABASE_URL="postgresql://username:password@localhost:5432/mlaku_mulu_db"
+
+# JWT
+JWT_SECRET=your_jwt_secret_here
+
+# Server
+PORT=8086
+
+# Email (Gmail SMTP)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your_email@gmail.com
+SMTP_PASS=your_app_password
+SMTP_FROM="MLaku Mulu <your_email@gmail.com>"
+
+# App
+APP_URL=http://localhost:3000
 ```
 
-## Compile and run the project
+### **Installation & Setup**
 
 ```bash
-# development
-$ npm run start
+# Clone repository
+git clone <repository-url>
+cd mlaku-mulu-backend
 
-# watch mode
-$ npm run start:dev
+# Install dependencies
+npm install
 
-# production mode
-$ npm run start:prod
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate deploy
+
+# Seed database (optional)
+npm run seed
+
+# Start development server
+npm run start:dev
 ```
 
-## Run tests
+### **Available Scripts**
 
 ```bash
-# unit tests
-$ npm run test
+# Development
+npm run start:dev          # Start with watch mode
+npm run start:debug        # Start with debug mode
 
-# e2e tests
-$ npm run test:e2e
+# Production
+npm run build              # Build application
+npm run start:prod         # Start production server
+npm run start:with-db      # Start with auto-migration & seed
 
-# test coverage
-$ npm run test:cov
+# Database
+npm run migrate            # Run migrations
+npm run seed               # Seed database
+npm run db:setup          # Setup database (migrate + seed)
+
+# Testing
+npm run test               # Run unit tests
+npm run test:e2e          # Run e2e tests
+npm run test:cov          # Run tests with coverage
+
+# Code Quality
+npm run lint               # Run ESLint
+npm run format             # Format code with Prettier
 ```
 
-## Deployment
+## 🐳 **Docker Deployment**
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### **Build & Run**
 
 ```bash
-$ npm install -g mau
-$ mau deploy
+# Build Docker image
+docker build -t mlaku-mulu-backend .
+
+# Run container
+docker run -d \
+  --name mlaku-mulu-backend \
+  -p 8086:8086 \
+  --env-file .env \
+  mlaku-mulu-backend
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## 🔐 **Authentication & Authorization**
 
-## Resources
+### **User Roles**
 
-Check out a few resources that may come in handy when working with NestJS:
+1. **👑 Owner**
+   - Full system access
+   - User management
+   - Trip creation and management
+   - System statistics
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+2. **👨‍💼 Staff (Pegawai)**
+   - User viewing
+   - Trip management
+   - Booking management
+   - Limited admin access
 
-## Support
+3. **🧳 Traveler (Turis)**
+   - Personal trip booking
+   - Profile management
+   - Trip history
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### **JWT Flow**
 
-## Stay in touch
+1. User login → Receive access & refresh tokens
+2. Access token for API requests
+3. Refresh token for new access tokens
+4. Automatic token refresh handling
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+## 🗺️ **API Endpoints**
 
-## License
+### **Core Modules**
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- **Auth**: `/auth/*` - Authentication endpoints
+- **Users**: `/users/*` - User management
+- **Trips**: `/trips/*` - Trip operations
+- **Owner**: `/owner/*` - Owner-specific features
+- **Pegawai**: `/pegawai/*` - Staff features
+
+### **Key Endpoints**
+
+```
+POST   /auth/register          # User registration
+POST   /auth/login             # User login
+POST   /auth/verify-otp        # OTP verification
+POST   /auth/refresh           # Token refresh
+POST   /auth/logout            # User logout
+
+GET    /users                  # List users (staff/owner)
+GET    /users/:id              # Get user details
+PATCH  /users/:id              # Update user
+DELETE /users/:id              # Delete user
+
+GET    /trips                  # List trips
+POST   /trips                  # Create trip
+GET    /trips/:id              # Get trip details
+PATCH  /trips/:id              # Update trip
+DELETE /trips/:id              # Delete trip
+
+GET    /owner/dashboard/stats  # Owner dashboard
+GET    /pegawai/dashboard      # Staff dashboard
+```
+
+## 🗄️ **Database Management**
+
+### **Prisma Commands**
+
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run migrations
+npx prisma migrate dev        # Development
+npx prisma migrate deploy     # Production
+
+# View database
+npx prisma studio
+
+# Reset database
+npx prisma migrate reset
+```
+
+### **Auto-Setup Features**
+
+The application automatically:
+- ✅ Generates Prisma client on startup
+- ✅ Runs pending migrations
+- ✅ Seeds database if empty
+- ✅ Handles database connection issues
+
+## 🧪 **Testing**
+
+### **Test Structure**
+
+```
+test/
+├── jest-e2e.json          # E2E test configuration
+├── app.e2e-spec.ts        # Main app E2E tests
+└── auth/                  # Authentication tests
+    └── auth.e2e-spec.ts
+```
+
+### **Running Tests**
+
+```bash
+# Unit tests
+npm run test
+
+# E2E tests
+npm run test:e2e
+
+# Test coverage
+npm run test:cov
+
+# Watch mode
+npm run test:watch
+```
+
+## 🚀 **Deployment**
+
+### **Production Considerations**
+
+- Use `npm run start:with-db` for automatic database setup
+- Ensure environment variables are properly configured
+- Use reverse proxy (Nginx) for production
+- Implement proper logging and monitoring
+- Set up SSL/TLS certificates
+
+### **Environment-Specific Configs**
+
+```bash
+# Development
+NODE_ENV=development
+PORT=3000
+
+# Production
+NODE_ENV=production
+PORT=8086
+```

@@ -12,13 +12,17 @@
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/src/main",
+    "start:with-db": "prisma generate && prisma migrate deploy && npm run seed-if-empty && node dist/src/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "seed": "ts-node prisma/seed.ts"
+    "seed": "ts-node prisma/seed.ts",
+    "seed-if-empty": "node -e \"const { PrismaClient } = require('@prisma/client'); const prisma = new PrismaClient(); prisma.user.count().then(count => { if(count === 0) { console.log('Database empty, running seed...'); require('child_process').execSync('npx ts-node prisma/seed.ts', {stdio: 'inherit'}); } else { console.log('Database already seeded, skipping...'); } process.exit(0); }).catch(e => { console.error('Error checking database:', e); process.exit(1); });\"",
+    "migrate": "prisma migrate deploy",
+    "db:setup": "prisma generate && prisma migrate deploy && ts-node prisma/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.9",
