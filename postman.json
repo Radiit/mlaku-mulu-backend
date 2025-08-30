@@ -1,0 +1,2742 @@
+{
+	"info": {
+		"_postman_id": "43717e67-d81a-4b17-af04-f9cec4aaabd9",
+		"name": "Mlaku Mulu API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "39299483"
+	},
+	"item": [
+		{
+			"name": "Pegawai",
+			"item": [
+				{
+					"name": "Register pegawai",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"taberik1995@yuki.ren\",\n  \"password\": \"password123\",\n  \"phone\": \"+62823850337523445\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register/pegawai",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register",
+								"pegawai"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Error field",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"taberik1995@yuki.ren\",\n  \"password\": \"password123\",\n  \"phone\": \"+62823850337545\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register/pegawai",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register",
+										"pegawai"
+									]
+								}
+							},
+							"status": "Conflict",
+							"code": 409,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "179"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b3-B/ZZfqrcyqdcPCnJxz8UppKsWHw\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:55:30 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Phone already registered\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"phone\",\n            \"reasons\": [\n                \"unique constraint\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/auth/register/pegawai\",\n        \"statusCode\": 409\n    }\n}"
+						},
+						{
+							"name": "Register pegawai",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"taberik1995@yuki.ren\",\n  \"password\": \"password123\",\n  \"phone\": \"+62823850337523445\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register/pegawai",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register",
+										"pegawai"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "184"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b8-qphriiFab7VS+at7HNYxyNPAQsw\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:55:49 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Employee registered successfully. Check your email for OTP.\",\n    \"data\": {\n        \"message\": \"User registered successfully. Please check your email for the OTP to verify your account.\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"taberik1995@yuki.ren\",\n    \"otp\": \"156867\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-otp"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Verify OTP",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"dputin2009@aiqoe.com\",\n    \"otp\": \"740998\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-otp",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "110"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"6e-laFFAPjHiPU6Ac9VKNK31pjAODY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 10:59:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Email verified successfully\",\n    \"data\": {\n        \"message\": \"Email verified successfully. You can now login.\"\n    }\n}"
+						},
+						{
+							"name": "Already verified",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"dputin2009@aiqoe.com\",\n    \"otp\": \"156867\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-otp",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "103"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"67-GLQo3cMEygd0JatFldJ7bDvOXVo\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:56:12 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User is already verified.\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/auth/verify-otp\",\n        \"statusCode\": 400\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Resend OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"dputin2009@aiqoeSD.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}} /auth/resend-otp",
+							"host": [
+								"{{base_url}} "
+							],
+							"path": [
+								"auth",
+								"resend-otp"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "New Request",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"dputin2009@aiqoe.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}} /auth/resend-otp",
+									"host": [
+										"{{base_url}} "
+									],
+									"path": [
+										"auth",
+										"resend-otp"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "110"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"6e-5cIVABU2filHDYWhBwoHwtP7NF0\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 10:58:31 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"OTP resent successfully\",\n    \"data\": {\n        \"message\": \"New OTP sent successfully. Please check your email.\"\n    }\n}"
+						},
+						{
+							"name": "Error Must Register",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"dputin2009@aiqoeSD.com\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}} /auth/resend-otp",
+									"host": [
+										"{{base_url}} "
+									],
+									"path": [
+										"auth",
+										"resend-otp"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "180"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b4-iy/GAGLyP83WG0U6IPyg65eo9XQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 10:58:43 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Email not found. Please register first.\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"email\",\n            \"reasons\": [\n                \"not found\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/auth/resend-otp\",\n        \"statusCode\": 400\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login pegawai",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Extract access_token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"data\");",
+									"    pm.expect(jsonData.data).to.have.property(\"access_token\");",
+									"",
+									"    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"",
+									"    console.log(\"Access Token:\", jsonData.data.access_token);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"taberik1995@yuki.ren\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Login pegawai",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"dputin2009@aiqoe.com\",\n  \"password\": \"pasdassword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "268"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"10c-R3Xbk90vIZyr1x/YSRHKpsVd9uo\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:00:34 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [
+								{
+									"expires": "Invalid Date",
+									"domain": "",
+									"path": ""
+								}
+							],
+							"body": "{\n    \"message\": \"Login successful\",\n    \"data\": {\n        \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiYzYyMWI0MC00NTQ2LTQ0Y2QtYjUzMy01MjRjNTQ1NDUzMTYiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTc1NjQ2NTIzNCwiZXhwIjoxNzU2NDY4ODM0fQ.X2-zNLAujz-FtIqxknNLXx1ReeCCOWkjhF4N35vTz68\"\n    }\n}"
+						},
+						{
+							"name": "field error",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"dputin2009@aiqoe.com\",\n  \"password\": \"pasasdfsword123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "157"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"9d-wNuxabhVvsWOOsTjigW9ivDC7Zg\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:00:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid credentials\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"password\",\n            \"reasons\": [\n                \"mismatch\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/auth/login\",\n        \"statusCode\": 401\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get all users",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get all users",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "2218"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"8aa-Pcruit/P02PO4+P2nwCg5HVnF+s\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:03:05 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Users retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": \"d617ca78-ef25-4844-b2ed-788f18f859d2\",\n            \"email\": \"radityaaydin2@gmail.com\",\n            \"password\": \"$2b$10$SIGq6Dx06hM1P4tihov5Vu/uT6SDBp7nGlPdTNAQeWE8t7j28D/Bq\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+6282385033765\",\n            \"otpCode\": null,\n            \"otpExpiresAt\": null\n        },\n        {\n            \"id\": \"c9de7c75-52c6-43f6-82b3-6dd9db489105\",\n            \"email\": \"djdens@doremifasoleando.es\",\n            \"password\": \"$2a$10$6lj1vfIBF4xV3.09gLSKweSvgvul5ZjDjDIcdBNQ6yYo7bdzByS5m\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+6282385033765213\",\n            \"otpCode\": \"886037\",\n            \"otpExpiresAt\": \"2025-08-29T10:23:57.310Z\"\n        },\n        {\n            \"id\": \"d0feb2f2-ee2e-4d9e-98be-6ac8bf066036\",\n            \"email\": \"jab71@hieuclone.net\",\n            \"password\": \"$2a$10$yYFdKSY86bon4C6qRpG.JOw8/08SVYMpSrQ7nDwgmAO3nfLfK.u3G\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+62823850337\",\n            \"otpCode\": \"292643\",\n            \"otpExpiresAt\": \"2025-08-29T10:27:37.333Z\"\n        },\n        {\n            \"id\": \"12c3ff3e-4194-40bc-a2e7-69fbe064b4bd\",\n            \"email\": \"ricado171@auraence.com\",\n            \"password\": \"$2a$10$pD9TRN6.U4YlQYTPS9wXk.nVrye.Ts6lfBLeJKbdL01Y3Bu6Kj9m6\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+62823850337653\",\n            \"otpCode\": \"277787\",\n            \"otpExpiresAt\": \"2025-08-29T10:28:09.204Z\"\n        },\n        {\n            \"id\": \"083d16ad-d6f6-48f8-9b76-f31e36468308\",\n            \"email\": \"usidorqsus0282o@accountscenter.support\",\n            \"password\": \"$2a$10$OfjWQEhu2c2N3IKjk11HpumhXVXtHLizS9sPyLJv.Pzx.x7DOk4P6\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+62823850337656\",\n            \"otpCode\": \"178955\",\n            \"otpExpiresAt\": \"2025-08-29T10:31:13.786Z\"\n        },\n        {\n            \"id\": \"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb\",\n            \"email\": \"kuhnj@private-year.com\",\n            \"password\": \"$2a$10$IF1T87wkLZ1cL.RoXglk4Ob.vBkcusuIQZig7ru2GN7P8qiyE3iyy\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+62823850337666\",\n            \"otpCode\": \"533350\",\n            \"otpExpiresAt\": \"2025-08-29T10:49:46.744Z\"\n        },\n        {\n            \"id\": \"59405d59-636a-4dfa-8420-8b30683094dc\",\n            \"email\": \"mensan98th@nhotv.com\",\n            \"password\": \"$2a$10$qcVAKduJywpI73u67sBaE.c2QXMuQDTxNqyHy3zxesiOgGnfGJg4S\",\n            \"role\": \"pegawai\",\n            \"isVerified\": false,\n            \"phone\": \"+62823850337546\",\n            \"otpCode\": \"351717\",\n            \"otpExpiresAt\": \"2025-08-29T10:52:21.961Z\"\n        },\n        {\n            \"id\": \"bc621b40-4546-44cd-b533-524c54545316\",\n            \"email\": \"dputin2009@aiqoe.com\",\n            \"password\": \"$2a$10$KhogEpJyEEECicH78xm3AOAEVDEcaIKhquaMVVlCUscVEl1i4EevW\",\n            \"role\": \"pegawai\",\n            \"isVerified\": true,\n            \"phone\": \"+62823850337545\",\n            \"otpCode\": null,\n            \"otpExpiresAt\": null\n        }\n    ]\n}"
+						},
+						{
+							"name": "error user not valid",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "80"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"50-lUij/QavShBlUC/h+u6ZxE8cvSQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:03:19 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Unauthorized\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/users\",\n        \"statusCode\": 401\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get users",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNDk4NjBiYy02M2IwLTRkNjktOTU0Ny1jNGMwMWQzMmQyZTAiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTczOTQxMTE5MiwiZXhwIjoxNzM5NDE0NzkyfQ.VxoC7oJqKWfYNyCUKxoJAxOUIwbkyBLwMsK1YD-eoQg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/8d4c9e47-4d12-4ca1-bd59-be29361b21eadsfsdf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"8d4c9e47-4d12-4ca1-bd59-be29361b21eadsfsdf"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Error user valid",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0eb",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "117"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"75-SU/hqXf6JF2cVRyAKMLXg/uz/LY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:04:55 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Unauthorized\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0eb\",\n        \"statusCode\": 401\n    }\n}"
+						},
+						{
+							"name": "Get user",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0eb",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "324"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"144-jn3vbr9zJY/Gtr9xyoXgzV2vWzQ\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:05:48 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User retrieved successfully\",\n    \"data\": {\n        \"id\": \"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb\",\n        \"email\": \"kuhnj@private-year.com\",\n        \"password\": \"$2a$10$IF1T87wkLZ1cL.RoXglk4Ob.vBkcusuIQZig7ru2GN7P8qiyE3iyy\",\n        \"role\": \"pegawai\",\n        \"isVerified\": false,\n        \"phone\": \"+62823850337666\",\n        \"otpCode\": \"533350\",\n        \"otpExpiresAt\": \"2025-08-29T10:49:46.744Z\"\n    }\n}"
+						},
+						{
+							"name": "Error user not found",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0e",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"e23cd351-dbc5-4b7c-82a0-da2e55fae0e"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "178"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b2-T8Qp4VUV7SJOdYo/aYVUqt5Zqjg\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:06:04 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User not found\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"id\",\n            \"reasons\": [\n                \"not found\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0e\",\n        \"statusCode\": 404\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Del User",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0eb",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Del User",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0eb",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"e23cd351-dbc5-4b7c-82a0-da2e55fae0eb"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "51"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"33-Fv+XZR3Z3mc8AlPLjCNLwpXLTqY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:06:40 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User deleted successfully\",\n    \"data\": null\n}"
+						},
+						{
+							"name": "User not found",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0ebsdf",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"e23cd351-dbc5-4b7c-82a0-da2e55fae0ebsdf"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "182"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b6-sTX3GL7i/mzZxh5NIK0rbLjsvDc\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:07:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User not found\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"id\",\n            \"reasons\": [\n                \"not found\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/users/e23cd351-dbc5-4b7c-82a0-da2e55fae0ebsdf\",\n        \"statusCode\": 404\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"radityaaydin2@gmail.com\",\n    \"password\": \"Passwordbaru123\",\n    \"role\": \"pegawai\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/users/d617ca78-ef25-4844-b2ed-788f18f859d2",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"users",
+								"d617ca78-ef25-4844-b2ed-788f18f859d2"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update user",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"phone\": \"23423423432\",\n  \"password\": \"Passwordbaru123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/d617ca78-ef25-4844-b2ed-788f18f859d2",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"d617ca78-ef25-4844-b2ed-788f18f859d2"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "248"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"f8-cF5uavFPohQ0053JWh44WVNRdBI\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:09:35 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User updated successfully\",\n    \"data\": {\n        \"id\": \"d617ca78-ef25-4844-b2ed-788f18f859d2\",\n        \"email\": \"radityaaydin2@gmail.com\",\n        \"password\": \"Passwordbaru123\",\n        \"role\": \"pegawai\",\n        \"isVerified\": false,\n        \"phone\": \"23423423432\",\n        \"otpCode\": null,\n        \"otpExpiresAt\": null\n    }\n}"
+						},
+						{
+							"name": "Field restriected",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"radityaaydin2@gmail.com\",\n    \"password\": \"Passwordbaru123\",\n    \"role\": \"pegawai\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/users/d617ca78-ef25-4844-b2ed-788f18f859d2",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"users",
+										"d617ca78-ef25-4844-b2ed-788f18f859d2"
+									]
+								}
+							},
+							"status": "Internal Server Error",
+							"code": 500,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "207"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"cf-Gdg44lAzqhYTkhXEZe5bIePR06o\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:11:01 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Validation failed\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"email\",\n            \"reasons\": [\n                \"property email should not exist\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/users/d617ca78-ef25-4844-b2ed-788f18f859d2\",\n        \"statusCode\": 500\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Crete trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNDk4NjBiYy02M2IwLTRkNjktOTU0Ny1jNGMwMWQzMmQyZTAiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTczOTQxMTE5MiwiZXhwIjoxNzM5NDE0NzkyfQ.VxoC7oJqKWfYNyCUKxoJAxOUIwbkyBLwMsK1YD-eoQg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n  \"startDate\": \"2025-03-01T10:00:00Z\",\n  \"endDate\": \"2025-03-05T15:00:00Z\",\n  \"destination\": \"Bandung, Indonesia\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Crete trip",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n  \"startDate\": \"2025-03-01T10:00:00Z\",\n  \"endDate\": \"2025-03-05T15:00:00Z\",\n  \"destination\": \"Bali, Indonesia\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "264"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:51:17 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"108-yXpThPpSY7lZPLmLLPRwD82T9Bg\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Trip created successfully\",\n    \"data\": {\n        \"id\": \"46db4a76-b937-4af3-8340-97af1041d0cc\",\n        \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n        \"startDate\": \"2025-03-01T10:00:00.000Z\",\n        \"endDate\": \"2025-03-05T15:00:00.000Z\",\n        \"destination\": \"Bali, Indonesia\"\n    }\n}"
+						},
+						{
+							"name": "Crete trip",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n  \"startDate\": \"2025-03-01T10:00:00Z\",\n  \"endDate\": \"2025-03-05T15:00:00Z\",\n  \"destination\": \"Bandung, Indonesia\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "132"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:51:31 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"84-3QvBjjJWRuGUyKp5MGMnar1ibRo\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Trip conflicts with an existing trip (ID: 46db4a76-b937-4af3-8340-97af1041d0cc)\",\n    \"error\": \"Bad Request\",\n    \"statusCode\": 400\n}"
+						}
+					]
+				},
+				{
+					"name": "Get all trips",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNDk4NjBiYy02M2IwLTRkNjktOTU0Ny1jNGMwMWQzMmQyZTAiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTczOTQxMTE5MiwiZXhwIjoxNzM5NDE0NzkyfQ.VxoC7oJqKWfYNyCUKxoJAxOUIwbkyBLwMsK1YD-eoQg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/trips",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Get all trips",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/trips",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "539"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:51:48 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"21b-V81UABJPYPjnTuFnCJLPA911jtk\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Trip retrieved successfully\",\n    \"data\": {\n        \"success\": true,\n        \"message\": \"Trips retrieved successfully\",\n        \"data\": [\n            {\n                \"id\": \"6cdc8791-21d1-4cac-8335-230a2a28ca52\",\n                \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n                \"startDate\": \"2031-03-01T10:00:00.000Z\",\n                \"endDate\": \"2025-03-06T12:00:00.000Z\",\n                \"destination\": \"bandung, Indonesia\"\n            },\n            {\n                \"id\": \"46db4a76-b937-4af3-8340-97af1041d0cc\",\n                \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n                \"startDate\": \"2025-03-01T10:00:00.000Z\",\n                \"endDate\": \"2025-03-05T15:00:00.000Z\",\n                \"destination\": \"Bali, Indonesia\"\n            }\n        ]\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNDk4NjBiYy02M2IwLTRkNjktOTU0Ny1jNGMwMWQzMmQyZTAiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTczOTQxMTE5MiwiZXhwIjoxNzM5NDE0NzkyfQ.VxoC7oJqKWfYNyCUKxoJAxOUIwbkyBLwMsK1YD-eoQg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"endDate\": \"2025-03-06T12:00:00Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips/46db4a76-b937-4af3-8340-97af1041d0cc",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"46db4a76-b937-4af3-8340-97af1041d0cc"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update trip",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"endDate\": \"2025-03-06T12:00:00Z\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/46db4a76-b937-4af3-8340-97af1041d0cc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"46db4a76-b937-4af3-8340-97af1041d0cc"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "264"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:52:40 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"108-THQQFFau/rAT1ssrSuc6dtQH8JE\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Trip updated successfully\",\n    \"data\": {\n        \"id\": \"46db4a76-b937-4af3-8340-97af1041d0cc\",\n        \"turisId\": \"8d4c9e47-4d12-4ca1-bd59-be29361b21ea\",\n        \"startDate\": \"2025-03-01T10:00:00.000Z\",\n        \"endDate\": \"2025-03-06T12:00:00.000Z\",\n        \"destination\": \"Bali, Indonesia\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwNDk4NjBiYy02M2IwLTRkNjktOTU0Ny1jNGMwMWQzMmQyZTAiLCJyb2xlIjoicGVnYXdhaSIsImlhdCI6MTczOTQxMTE5MiwiZXhwIjoxNzM5NDE0NzkyfQ.VxoC7oJqKWfYNyCUKxoJAxOUIwbkyBLwMsK1YD-eoQg",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/trips/46db4a76-b937-4af3-83fdsafadsf",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"46db4a76-b937-4af3-83fdsafadsf"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete trip",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/trips/46db4a76-b937-4af3-8340-97af1041d0cc",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"46db4a76-b937-4af3-8340-97af1041d0cc"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "101"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:52:46 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"65-a3zosMLPSr9C1Q5C+kePVrslDn0\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"success\": true,\n    \"message\": \"Trip deleted successfully\",\n    \"data\": {\n        \"message\": \"Trip deleted successfully\"\n    }\n}"
+						},
+						{
+							"name": "Delete trip",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{base_url}}/trips/46db4a76-b937-4af3-83fdsafadsf",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"46db4a76-b937-4af3-83fdsafadsf"
+									]
+								}
+							},
+							"status": "Not Found",
+							"code": 404,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "65"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:53:00 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"41-NVOlj1beGiRNF/fjl/wrv4xLrk8\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Trip not found\",\n    \"error\": \"Not Found\",\n    \"statusCode\": 404\n}"
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "Turis",
+			"item": [
+				{
+					"name": "Register turis",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"vzy92k83@afandi.baby\",\n  \"password\": \"password123\",\n  \"phone\": \"+6282385033769\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/register/turis",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"register",
+								"turis"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Register turis",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"vzy92k83@afandi.baby\",\n  \"password\": \"password123\",\n  \"phone\": \"+6282385033769\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/register/turis",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"register",
+										"turis"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "182"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"b6-QH/o70xw5R8XyiNW+uJ+9DdEUo8\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:58:58 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Client registered successfully. Check your email for OTP.\",\n    \"data\": {\n        \"message\": \"User registered successfully. Please check your email for the OTP to verify your account.\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Verify OTP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"vzy92k83@afandi.baby\",\n    \"otp\": \"852761\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/verify-otp",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"verify-otp"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Verify OTP",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"dputin2009@aiqoe.com\",\n    \"otp\": \"740998\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-otp",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "110"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"6e-laFFAPjHiPU6Ac9VKNK31pjAODY\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 10:59:29 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Email verified successfully\",\n    \"data\": {\n        \"message\": \"Email verified successfully. You can now login.\"\n    }\n}"
+						},
+						{
+							"name": "Already verified",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"email\": \"dputin2009@aiqoe.com\",\n    \"otp\": \"156867\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/verify-otp",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"verify-otp"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "103"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"67-GLQo3cMEygd0JatFldJ7bDvOXVo\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 11:56:12 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"User is already verified.\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/auth/verify-otp\",\n        \"statusCode\": 400\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Login turis",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Extract access_token\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property(\"data\");",
+									"    pm.expect(jsonData.data).to.have.property(\"access_token\");",
+									"",
+									"    pm.environment.set(\"access_token\", jsonData.data.access_token);",
+									"",
+									"    console.log(\"Access Token:\", jsonData.data.access_token);",
+									"});",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"vzy92k83@afandi.baby\",\n  \"password\": \"password123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/auth/login",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Login turis",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"turis@example.com\",\n  \"password\": \"password123\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "227"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:53:30 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"e3-i/lXraBMifNTZj1VK9bbxV8m8mc\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZDRjOWU0Ny00ZDEyLTRjYTEtYmQ1OS1iZTI5MzYxYjIxZWEiLCJyb2xlIjoidHVyaXMiLCJpYXQiOjE3Mzk0MTE2MTAsImV4cCI6MTczOTQxNTIxMH0.BO4KVnvu2VbDxeMua8INTIqcAvqC7Tlj3mVEP8Fk9DU\"\n}"
+						},
+						{
+							"name": "Login turis",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"turis@example.com\",\n  \"password\": \"password12sadfsdaf3\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/auth/login",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "73"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:53:39 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"49-Fx+yDPXfDSYD3nxIxyU6P47CVX0\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Invalid credentials\",\n    \"error\": \"Unauthorized\",\n    \"statusCode\": 401\n}"
+						}
+					]
+				},
+				{
+					"name": "Turis create trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"startDate\": \"2024-02-15T08:00:00Z\",\n  \"endDate\": \"2024-02-20T18:00:00Z\",\n  \"destination\": \"Bali, Indonesia\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips/my-trip",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"my-trip"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Schedule overlap",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"startDate\": \"2024-02-15T08:00:00Z\",\n  \"endDate\": \"2024-02-20T18:00:00Z\",\n  \"destination\": \"Bali, Indonesia\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/my-trip",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"my-trip"
+									]
+								}
+							},
+							"status": "Bad Request",
+							"code": 400,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "300"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"12c-wtJhysa4nh6hz99IdMVErgvDxhE\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:14:56 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Trip conflicts with an existing trip (ID: b0495486-abdf-4b97-9af8-3dd6c59b90dd)\",\n    \"data\": null,\n    \"validationErrors\": [\n        {\n            \"field\": \"startDate\",\n            \"reasons\": [\n                \"overlap with existing trip\"\n            ]\n        },\n        {\n            \"field\": \"endDate\",\n            \"reasons\": [\n                \"overlap with existing trip\"\n            ]\n        }\n    ],\n    \"meta\": {\n        \"path\": \"/trips/my-trip\",\n        \"statusCode\": 400\n    }\n}"
+						},
+						{
+							"name": "Turis create trip",
+							"originalRequest": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"startDate\": \"2024-01-15T08:00:00Z\",\n  \"endDate\": \"2024-01-20T18:00:00Z\",\n  \"destination\": \"Bali, Indonesia\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/my-trip",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"my-trip"
+									]
+								}
+							},
+							"status": "Created",
+							"code": 201,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "254"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"fe-dtV3M2CY8mLa6D+CF15p7+i3HFc\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:15:24 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Your trip created successfully\",\n    \"data\": {\n        \"id\": \"40368cd4-fbad-4eb1-829e-e90bf3570a9e\",\n        \"turisId\": \"2ed2bff6-f2fe-4d52-99a8-22358c71b6e0\",\n        \"startDate\": \"2024-01-15T08:00:00.000Z\",\n        \"endDate\": \"2024-01-20T18:00:00.000Z\",\n        \"destination\": \"Bali, Indonesia\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Get my trip",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{access_token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips/me",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"me"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Unauthorized",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/me",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"me"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": null,
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "83"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"53-F8gGz+KjEqJpiA090bG9UhuZx4s\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:07:33 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Unauthorized\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/trips/me\",\n        \"statusCode\": 401\n    }\n}"
+						},
+						{
+							"name": "Get my trip",
+							"originalRequest": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/me",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"me"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "462"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"1ce-j3xNnsdE6xBPzsS0yAAD/IMRUZc\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:15:52 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Your trips retrieved successfully\",\n    \"data\": [\n        {\n            \"id\": \"b0495486-abdf-4b97-9af8-3dd6c59b90dd\",\n            \"turisId\": \"2ed2bff6-f2fe-4d52-99a8-22358c71b6e0\",\n            \"startDate\": \"2024-02-15T08:00:00.000Z\",\n            \"endDate\": \"2024-02-20T18:00:00.000Z\",\n            \"destination\": \"Bali, Indonesia\"\n        },\n        {\n            \"id\": \"40368cd4-fbad-4eb1-829e-e90bf3570a9e\",\n            \"turisId\": \"2ed2bff6-f2fe-4d52-99a8-22358c71b6e0\",\n            \"startDate\": \"2024-01-15T08:00:00.000Z\",\n            \"endDate\": \"2024-01-20T18:00:00.000Z\",\n            \"destination\": \"Bali, Indonesia\"\n        }\n    ]\n}"
+						}
+					]
+				},
+				{
+					"name": "Delete trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZDRjOWU0Ny00ZDEyLTRjYTEtYmQ1OS1iZTI5MzYxYjIxZWEiLCJyb2xlIjoidHVyaXMiLCJpYXQiOjE3Mzk0MTE2MTAsImV4cCI6MTczOTQxNTIxMH0.BO4KVnvu2VbDxeMua8INTIqcAvqC7Tlj3mVEP8Fk9DU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips/6cdc8791-21d1-4cac-8335-230a2a28ca52",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"6cdc8791-21d1-4cac-8335-230a2a28ca52"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Delete trip",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/6cdc8791-21d1-4cac-8335-230a2a28ca52",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"6cdc8791-21d1-4cac-8335-230a2a28ca52"
+									]
+								}
+							},
+							"status": "Forbidden",
+							"code": 403,
+							"_postman_previewlanguage": "json",
+							"header": [
+								{
+									"key": "Content-Length",
+									"value": "64"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Date",
+									"value": "Thu, 13 Feb 2025 01:55:51 GMT"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"40-GwEZ9kwjY4uR2Vgxv8fgNXAHM58\""
+								},
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Access Denied\",\n    \"error\": \"Forbidden\",\n    \"statusCode\": 403\n}"
+						},
+						{
+							"name": "Delete trip",
+							"originalRequest": {
+								"method": "DELETE",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/my-trip/b0495486-abdf-4b97-9af8-3dd6c59b90dd",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"my-trip",
+										"b0495486-abdf-4b97-9af8-3dd6c59b90dd"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "96"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"60-V67/Mfjnlaf2qLbcRkSyXvuDz6k\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:19:36 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Your trip deleted successfully\",\n    \"data\": {\n        \"message\": \"Your trip deleted successfully\"\n    }\n}"
+						}
+					]
+				},
+				{
+					"name": "Update trip",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI4ZDRjOWU0Ny00ZDEyLTRjYTEtYmQ1OS1iZTI5MzYxYjIxZWEiLCJyb2xlIjoidHVyaXMiLCJpYXQiOjE3Mzk0MTE2MTAsImV4cCI6MTczOTQxNTIxMH0.BO4KVnvu2VbDxeMua8INTIqcAvqC7Tlj3mVEP8Fk9DU",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"endDate\": \"2025-03-06T12:00:00Z\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/trips/6cdc8791-21d1-4cac-8335-230a2a28ca52",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"trips",
+								"6cdc8791-21d1-4cac-8335-230a2a28ca52"
+							]
+						}
+					},
+					"response": [
+						{
+							"name": "Update trip",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"endDate\": \"2025-03-06T12:00:00Z\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/my-trip/40368cd4-fbad-4eb1-829e-e90bf3570a9e",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"my-trip",
+										"40368cd4-fbad-4eb1-829e-e90bf3570a9e"
+									]
+								}
+							},
+							"status": "OK",
+							"code": 200,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "254"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"fe-YhrDrXP4ERzUmi0B7vh92DswI6E\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:21:57 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Your trip updated successfully\",\n    \"data\": {\n        \"id\": \"40368cd4-fbad-4eb1-829e-e90bf3570a9e\",\n        \"turisId\": \"2ed2bff6-f2fe-4d52-99a8-22358c71b6e0\",\n        \"startDate\": \"2024-01-15T08:00:00.000Z\",\n        \"endDate\": \"2025-03-06T12:00:00.000Z\",\n        \"destination\": \"Bali, Indonesia\"\n    }\n}"
+						},
+						{
+							"name": "Update trip",
+							"originalRequest": {
+								"method": "PATCH",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"endDate\": \"2025-03-06T12:00:00Z\"\n}\n",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{base_url}}/trips/my-trip/40368cd4-fbad-4eb1-829e-e90bf3570a9e",
+									"host": [
+										"{{base_url}}"
+									],
+									"path": [
+										"trips",
+										"my-trip",
+										"40368cd4-fbad-4eb1-829e-e90bf3570a9e"
+									]
+								}
+							},
+							"status": "Unauthorized",
+							"code": 401,
+							"_postman_previewlanguage": "",
+							"header": [
+								{
+									"key": "X-Powered-By",
+									"value": "Express"
+								},
+								{
+									"key": "Content-Type",
+									"value": "application/json; charset=utf-8"
+								},
+								{
+									"key": "Content-Length",
+									"value": "125"
+								},
+								{
+									"key": "ETag",
+									"value": "W/\"7d-qIpwsxa0NQr9jq/SihCl7WGZHQI\""
+								},
+								{
+									"key": "Date",
+									"value": "Fri, 29 Aug 2025 12:22:15 GMT"
+								},
+								{
+									"key": "Connection",
+									"value": "keep-alive"
+								},
+								{
+									"key": "Keep-Alive",
+									"value": "timeout=5"
+								}
+							],
+							"cookie": [],
+							"body": "{\n    \"message\": \"Unauthorized\",\n    \"data\": null,\n    \"meta\": {\n        \"path\": \"/trips/my-trip/40368cd4-fbad-4eb1-829e-e90bf3570a9e\",\n        \"statusCode\": 401\n    }\n}"
+						}
+					]
+				}
+			]
+		}
+	]
+}

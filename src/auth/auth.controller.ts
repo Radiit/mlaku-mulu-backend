@@ -17,6 +17,26 @@ export class AuthController {
     );
   }
 
+  @Post('register/pegawai')
+  async registerPegawai(@Body() registerDto: RegisterDto) {
+    return this.authService.register(
+      registerDto.email,
+      registerDto.password,
+      registerDto.phone,
+      'pegawai'
+    );
+  }
+
+  @Post('register/turis')
+  async registerTuris(@Body() registerDto: RegisterDto) {
+    return this.authService.register(
+      registerDto.email,
+      registerDto.password,
+      registerDto.phone,
+      'turis'
+    );
+  }
+
   @Get('verify')
   async verifyPhone(@Query('token') token: string) {
     return this.authService.verifyPhone(token);
