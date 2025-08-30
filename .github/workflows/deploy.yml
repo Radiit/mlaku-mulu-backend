@@ -34,14 +34,24 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
+      - name: Verify Docker image
+        run: |
+          echo "🔍 Verifying Docker image..."
+          docker images ${{ env.IMAGE_NAME }}:latest
+          docker inspect ${{ env.IMAGE_NAME }}:latest
+
       - name: Save Docker image
-        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
+        run: |
+          echo "💾 Saving Docker image..."
+          docker save ${{ env.IMAGE_NAME }}:latest -o image.tar
+          ls -la image.tar
+          echo "✅ Image saved successfully"
 
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
           name: docker-image
-          path: image.tar.gz
+          path: image.tar
 
   deploy:
     name: Deploy to VPS
@@ -104,9 +114,18 @@ jobs:
           echo "User: ${{ secrets.VPS_USER }}"
           echo "Path: ${{ secrets.VPS_PATH }}"
           
+          # Verify image file exists
+          if [ ! -f "image.tar" ]; then
+            echo "❌ Error: image.tar not found"
+            ls -la
+            exit 1
+          fi
+          
+          echo "📦 Image file size: $(du -h image.tar)"
+          
           # Copy Docker image to VPS using password
           echo "📦 Copying Docker image to VPS..."
-          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar.gz ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
+          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
           
           if [ $? -eq 0 ]; then
             echo "✅ Docker image copied successfully"
@@ -121,23 +140,44 @@ jobs:
             cd ${{ secrets.VPS_PATH }}
             
             echo "📁 Working directory: $(pwd)"
-            echo "📦 Loading Docker image..."
+            echo "📦 Verifying image file..."
             
-            # Load Docker image
-            docker load < image.tar.gz
+            # Check if image file exists and has content
+            if [ ! -f "image.tar" ]; then
+              echo "❌ Error: image.tar not found on VPS"
+              exit 1
+            fi
+            
+            echo "📦 Image file size: $(du -h image.tar)"
+            
+            echo "📦 Loading Docker image..."
+            # Load Docker image with error handling
+            if docker load < image.tar; then
+              echo "✅ Docker image loaded successfully"
+            else
+              echo "❌ Failed to load Docker image"
+              exit 1
+            fi
+            
+            # Verify image was loaded
+            if ! docker images | grep -q "${{ env.IMAGE_NAME }}"; then
+              echo "❌ Error: Image not found after loading"
+              docker images
+              exit 1
+            fi
             
             echo "🔄 Stopping existing container..."
             # Stop and remove existing container
-            docker stop ${{ env.CONTAINER_NAME }} || true
-            docker rm ${{ env.CONTAINER_NAME }} || true
+            docker stop ${{ env.CONTAINER_NAME }} || echo "No existing container to stop"
+            docker rm ${{ env.CONTAINER_NAME }} || echo "No existing container to remove"
             
             echo "🗑️ Removing old image..."
             # Remove old image
-            docker rmi ${{ env.IMAGE_NAME }}:latest || true
+            docker rmi ${{ env.IMAGE_NAME }}:latest || echo "No old image to remove"
             
             echo "🚀 Starting new container..."
             # Run new container
-            docker run -d \
+            CONTAINER_ID=$(docker run -d \
               --name ${{ env.CONTAINER_NAME }} \
               --restart unless-stopped \
               -p 8086:8086 \
@@ -150,23 +190,46 @@ jobs:
               -e SMTP_USER="${{ secrets.SMTP_USER }}" \
               -e SMTP_PASS="${{ secrets.SMTP_PASS }}" \
               -e SMTP_FROM="${{ secrets.SMTP_FROM }}" \
-              ${{ env.IMAGE_NAME }}:latest
+              ${{ env.IMAGE_NAME }}:latest)
+            
+            if [ $? -eq 0 ]; then
+              echo "✅ Container started successfully with ID: $CONTAINER_ID"
+            else
+              echo "❌ Failed to start container"
+              exit 1
+            fi
             
             echo "🧹 Cleaning up..."
             # Clean up
-            rm -f image.tar.gz
+            rm -f image.tar
             
             echo "⏳ Waiting for container to start..."
             # Wait for container to start
-            sleep 10
+            sleep 15
             
             echo "🏥 Running health check..."
-            # Health check
+            # Health check with retries
+            for i in {1..5}; do
+              echo "Health check attempt $i/5..."
+              if curl -f http://localhost:8086/health; then
+                echo "✅ Health check passed!"
+                break
+              else
+                echo "⏳ Health check attempt $i failed, waiting..."
+                sleep 5
+              fi
+            done
+            
+            # Final health check
             if curl -f http://localhost:8086/health; then
               echo "✅ Deployment successful! Container is healthy."
             else
-              echo "❌ Health check failed. Container may still be starting."
-              docker logs ${{ env.CONTAINER_NAME }} --tail 20
+              echo "❌ Health check failed after all attempts."
+              echo "📋 Container logs:"
+              docker logs ${{ env.CONTAINER_NAME }} --tail 30
+              echo "📊 Container status:"
+              docker ps -a
+              exit 1
             fi
           EOF
 
