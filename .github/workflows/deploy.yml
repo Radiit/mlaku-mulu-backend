@@ -1,4 +1,4 @@
-name: Deploy Docker App to Azure
+name: Deploy Docker App to VPS
 
 on:
   push:
@@ -8,17 +8,18 @@ on:
   workflow_dispatch:
 
 env:
-  REGISTRY: mlakumulu.azurecr.io
+  VPS_HOST: 43.134.87.90
+  VPS_USER: root
+  VPS_PATH: ~/mlaka-mulu
+  CONTAINER_NAME: mlaku-mulu-backend
   IMAGE_NAME: mlaku-mulu-backend
-  AZURE_WEBAPP_NAME: mlaku-mulu-backend
 
 jobs:
   build-and-deploy:
-    name: Build & Deploy Docker Image
+    name: Build & Deploy Docker Image to VPS
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      id-token: write
 
     steps:
       - name: Checkout repository
@@ -27,41 +28,104 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to Azure Container Registry
-        uses: azure/docker-login@v1
-        with:
-          login-server: ${{ env.REGISTRY }}
-          username: ${{ secrets.REGISTRY_USERNAME }}
-          password: ${{ secrets.REGISTRY_PASSWORD }}
-
-      - name: Build and push Docker image
+      - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
           context: .
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          client-secret: ${{ secrets.AZUREAPPSERVICE_SECRET }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+      - name: Save Docker image
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
 
-      - name: Deploy to Azure Web App for Containers
-        uses: azure/webapps-deploy@v3
+      - name: Upload Docker image artifact
+        uses: actions/upload-artifact@v4
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          slot-name: 'Production'
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          name: docker-image
+          path: image.tar.gz
 
-      - name: Health check
+  deploy:
+    name: Deploy to VPS
+    runs-on: ubuntu-latest
+    needs: build-and-deploy
+    permissions:
+      contents: read
+
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-image
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
+
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ env.VPS_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to VPS
+        run: |
+          # Copy Docker image to VPS
+          scp -o StrictHostKeyChecking=no image.tar.gz ${{ env.VPS_USER }}@${{ env.VPS_HOST }}:${{ env.VPS_PATH }}/
+          
+          # Deploy on VPS
+          ssh -o StrictHostKeyChecking=no ${{ env.VPS_USER }}@${{ env.VPS_HOST }} << 'EOF'
+            cd ${{ env.VPS_PATH }}
+            
+            # Load Docker image
+            docker load < image.tar.gz
+            
+            # Stop and remove existing container
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            
+            # Remove old image
+            docker rmi ${{ env.IMAGE_NAME }}:latest || true
+            
+            # Run new container
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p 8086:8086 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}" \
+              -e SMTP_HOST="${{ secrets.SMTP_HOST }}" \
+              -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+              -e SMTP_USER="${{ secrets.SMTP_USER }}" \
+              -e SMTP_PASS="${{ secrets.SMTP_PASS }}" \
+              -e SMTP_FROM="${{ secrets.SMTP_FROM }}" \
+              ${{ env.IMAGE_NAME }}:latest
+            
+            # Clean up
+            rm -f image.tar.gz
+            
+            # Wait for container to start
+            sleep 10
+            
+            # Health check
+            if curl -f http://localhost:8086/health; then
+              echo "✅ Deployment successful! Container is healthy."
+            else
+              echo "❌ Health check failed. Container may still be starting."
+              docker logs ${{ env.CONTAINER_NAME }} --tail 20
+            fi
+          EOF
+
+      - name: Verify deployment
         run: |
           echo "Waiting for deployment to be ready..."
           sleep 30
-          curl -f https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net/health || echo "Health check failed - app may still be starting"
+          if curl -f http://${{ env.VPS_HOST }}:8086/health; then
+            echo "✅ VPS deployment verified successfully!"
+          else
+            echo "❌ VPS deployment verification failed"
+            exit 1
+          fi
