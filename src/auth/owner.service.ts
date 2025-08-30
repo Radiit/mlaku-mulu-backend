@@ -16,22 +16,18 @@ export class OwnerService {
   async registerOwner(registerOwnerDto: RegisterOwnerDto) {
     const { email, password, phone, name } = registerOwnerDto;
 
-    // Check if email already exists
     const existingUser = await this.prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
 
-    // Check if phone already exists
     const existingPhone = await this.prisma.user.findUnique({ where: { phone } });
     if (existingPhone) {
       throw new ConflictException('Phone number already registered');
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate verification token (OTP) - using same format as auth service
     const verificationToken = this.generateOtp();
     const tokenExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
@@ -48,7 +44,6 @@ export class OwnerService {
         },
       });
 
-      // Send OTP email
       await this.emailService.sendOtpEmail(email, verificationToken);
 
       return ResponseHelper.created(
@@ -77,7 +72,6 @@ export class OwnerService {
     }
   }
 
-  // Helper method to generate consistent OTP format (same as auth service)
   private generateOtp(): string {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let result = '';
@@ -88,7 +82,6 @@ export class OwnerService {
   }
 
   async getAllUsers(currentUserId: string, page: number = 1, limit: number = 10) {
-    // Check if current user is owner
     const currentUser = await this.prisma.user.findUnique({ 
       where: { id: currentUserId },
       select: { role: true }
@@ -140,7 +133,6 @@ export class OwnerService {
   }
 
   async getUserById(userId: string, currentUserId: string) {
-    // Check if current user is owner
     const currentUser = await this.prisma.user.findUnique({ 
       where: { id: currentUserId },
       select: { role: true }
@@ -180,7 +172,6 @@ export class OwnerService {
   async resendOwnerOtp(resendOwnerOtpDto: ResendOwnerOtpDto) {
     const { email } = resendOwnerOtpDto;
 
-    // Find owner by email
     const owner = await this.prisma.user.findUnique({
       where: { email },
       select: {
@@ -203,11 +194,9 @@ export class OwnerService {
       throw new BadRequestException('Owner is already verified');
     }
 
-    // Generate new verification token using same format as auth service
     const verificationToken = this.generateOtp();
     const tokenExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    // Update verification token
     await this.prisma.user.update({
       where: { id: owner.id },
       data: {
@@ -216,7 +205,6 @@ export class OwnerService {
       }
     });
 
-    // Send new OTP email
     await this.emailService.sendOtpEmail(email, verificationToken);
 
     return ResponseHelper.success(
@@ -226,7 +214,6 @@ export class OwnerService {
   }
 
   async deleteUser(userId: string, currentUserId: string) {
-    // Check if current user is owner
     const currentUser = await this.prisma.user.findUnique({ 
       where: { id: currentUserId },
       select: { role: true }
@@ -240,7 +227,6 @@ export class OwnerService {
       throw new ForbiddenException('Only owners can delete users');
     }
 
-    // Check if target user exists
     const targetUser = await this.prisma.user.findUnique({ 
       where: { id: userId },
       select: { id: true, role: true }
@@ -250,12 +236,10 @@ export class OwnerService {
       throw new NotFoundException('Target user not found');
     }
 
-    // Prevent deleting owner
     if (targetUser.role === 'owner') {
       throw new ForbiddenException('Cannot delete owner account');
     }
 
-    // Delete user
     await this.prisma.user.delete({ where: { id: userId } });
 
     return ResponseHelper.success(
@@ -264,27 +248,11 @@ export class OwnerService {
     );
   }
 
-  async getOwnerDashboardStats(currentUserId: string) {
-    // Check if current user is owner
-    const currentUser = await this.prisma.user.findUnique({ 
-      where: { id: currentUserId },
-      select: { role: true }
-    });
-
-    if (!currentUser) {
-      throw new NotFoundException('Current user not found');
-    }
-
-    if (currentUser.role !== 'owner') {
-      throw new ForbiddenException('Only owners can access dashboard stats');
-    }
-
-    // Get current date for calculations
+  async getOwnerDashboardStats() {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
-    // Get user statistics
     const [
       totalUsers,
       totalTrips,
@@ -296,46 +264,45 @@ export class OwnerService {
       recentTrips,
       topDestinations
     ] = await Promise.all([
-      // Total users
       this.prisma.user.count(),
       
-      // Total trips
       this.prisma.trip.count(),
       
-      // Verified users
       this.prisma.user.count({ where: { isVerified: true } }),
       
-      // Unverified users
       this.prisma.user.count({ where: { isVerified: false } }),
       
-      // Trips this month
       this.prisma.trip.count({
         where: { createdAt: { gte: startOfMonth } }
       }),
       
-      // Trips this year
       this.prisma.trip.count({
         where: { createdAt: { gte: startOfYear } }
       }),
       
-      // Role distribution
       this.prisma.user.groupBy({
         by: ['role'],
         _count: { role: true }
       }),
       
-      // Recent trips (last 5)
       this.prisma.trip.findMany({
         take: 5,
         orderBy: { createdAt: 'desc' },
         include: {
-          turis: {
-            select: { email: true, phone: true }
+          owner: {
+            select: { email: true, role: true }
+          },
+          bookings: {
+            take: 3,
+            include: {
+              user: {
+                select: { email: true, phone: true, role: true }
+              }
+            }
           }
         }
       }),
       
-      // Top destinations
       this.prisma.trip.groupBy({
         by: ['destination'],
         _count: { destination: true },
@@ -344,37 +311,38 @@ export class OwnerService {
       })
     ]);
 
-    // Calculate role counts
     const roleStats = roleCounts.reduce((acc, item) => {
       acc[item.role] = item._count.role;
       return acc;
     }, {} as Record<string, number>);
 
-    // Calculate average trips per user
     const averageTripsPerUser = totalUsers > 0 ? (totalTrips / totalUsers).toFixed(2) : '0';
 
-    // Format recent trips
     const formattedRecentTrips = recentTrips.map(trip => ({
       id: trip.id,
+      title: trip.title,
       destination: trip.destination,
       startDate: trip.startDate,
       endDate: trip.endDate,
-      turisEmail: trip.turis.email,
-      turisPhone: trip.turis.phone,
+      ownerEmail: trip.owner.email,
+      totalBookings: trip.bookings.length,
+      recentBookings: trip.bookings.map(booking => ({
+        userEmail: booking.user.email,
+        userPhone: booking.user.phone,
+        userRole: booking.user.role,
+        status: booking.status
+      })),
       createdAt: trip.createdAt
     }));
 
-    // Format top destinations
     const formattedTopDestinations = topDestinations.map(item => ({
       destination: item.destination,
       count: item._count.destination
     }));
 
-    // Get monthly stats for current year
     const monthlyStats = await this.getMonthlyStats(now.getFullYear());
 
     const dashboardStats = {
-      // User Overview
       userOverview: {
         totalUsers,
         verifiedUsers,
@@ -382,14 +350,12 @@ export class OwnerService {
         verificationRate: totalUsers > 0 ? ((verifiedUsers / totalUsers) * 100).toFixed(1) + '%' : '0%'
       },
       
-      // Role Distribution
       roleDistribution: {
         owner: roleStats.owner || 0,
         pegawai: roleStats.pegawai || 0,
         turis: roleStats.turis || 0
       },
-      
-      // Trip Statistics
+
       tripStatistics: {
         totalTrips,
         tripsThisMonth,
@@ -398,19 +364,15 @@ export class OwnerService {
         monthlyGrowth: this.calculateGrowthRate(tripsThisMonth, tripsThisYear)
       },
       
-      // Top Destinations
       topDestinations: formattedTopDestinations,
       
-      // Recent Activity
       recentActivity: {
         recentTrips: formattedRecentTrips,
         lastUpdated: now
       },
       
-      // Monthly Trends
       monthlyTrends: monthlyStats,
       
-      // System Health
       systemHealth: {
         totalActiveUsers: verifiedUsers,
         inactiveUsers: unverifiedUsers,

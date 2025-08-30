@@ -36,7 +36,7 @@ export class OwnerController {
   @UseGuards(JwtAuthGuard, OwnerRoleGuard)
   @OwnerRole()
   async getDashboardStats(@Request() req) {
-    return this.ownerService.getOwnerDashboardStats(req.user.id);
+    return this.ownerService.getOwnerDashboardStats();
   }
 
   @Get('users')

@@ -1,134 +1,36 @@
-import { BadRequestException, Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateTripDto } from '../auth/dto/create-trip.dto';
-import { CreateTripTurisDto } from '../auth/dto/create-trip-turis.dto';
-import { UpdateTripDto } from '../auth/dto/update-trip.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { PaginationHelper } from '../common/utils/pagination';
+import { CreateTripDto } from './dto/create-trip.dto';
+import { UpdateTripDto } from './dto/update-trip.dto';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 import { ResponseHelper } from '../common/utils/response';
 
 @Injectable()
 export class TripsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findAllTrips(paginationDto: PaginationDto) {
-    const { skip, take } = PaginationHelper.getSkipAndTake(paginationDto);
-    const orderBy = PaginationHelper.getOrderBy(paginationDto);
-
-    const total = await this.prisma.trip.count();
-
-    // Get paginated data
-    const trips = await this.prisma.trip.findMany({
-      skip,
-      take,
-      orderBy,
-      include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
-          }
-        }
-      }
+  async createTrip(createTripDto: CreateTripDto, ownerId: string) {
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { role: true }
     });
 
-    const meta = PaginationHelper.calculatePaginationMeta(paginationDto, total);
-
-    return ResponseHelper.success(
-      trips,
-      'Trips retrieved successfully',
-      200,
-      meta
-    );
-  }
-
-  async findTripByUser(userId: string, paginationDto?: PaginationDto) {
-    const { skip, take } = PaginationHelper.getSkipAndTake(paginationDto || {});
-    const orderBy = PaginationHelper.getOrderBy(paginationDto || {});
-
-    const total = await this.prisma.trip.count({
-      where: { turisId: userId }
-    });
-
-    // Get paginated trips for this user
-    const trips = await this.prisma.trip.findMany({ 
-      where: { turisId: userId },
-      skip,
-      take,
-      orderBy,
-      include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
-          }
-        }
-      }
-    });
-    
-    const meta = PaginationHelper.calculatePaginationMeta(paginationDto || {}, total);
-    
-    return ResponseHelper.success(
-      trips,
-      'Your trips retrieved successfully',
-      200,
-      meta
-    );
-  }
-
-  async createTrip(userId: string, createTripDto: CreateTripDto) {
-    const user = await this.prisma.user.findUnique({ where: { id: createTripDto.turisId } });
-
-    if (!user) {
-      throw new NotFoundException(`User with ID ${createTripDto.turisId} not found.`);
+    if (!owner || owner.role !== 'owner') {
+      throw new ForbiddenException('Only owners can create trips');
     }
-    if (user.role !== 'turis') {
-      throw new ForbiddenException(`User with ID ${createTripDto.turisId} is not a turis.`);
-    }
-
-    const startDate = this.parseUtcIso(createTripDto.startDate, 'startDate');
-    const endDate = this.parseUtcIso(createTripDto.endDate, 'endDate');
-    if (startDate > endDate) {
-      throw new BadRequestException('startDate must be before or equal to endDate');
-    }
-
-    const conflictingTrip = await this.prisma.trip.findFirst({
-      where: {
-        turisId: createTripDto.turisId,
-        OR: [
-          {
-            startDate: { lte: endDate },
-            endDate: { gte: startDate },
-          },
-        ],
-      },
-    });
-
-    if (conflictingTrip) {
-      throw new BadRequestException(`Trip conflicts with an existing trip (ID: ${conflictingTrip.id})`);
-    }
-
-    const destination = this.resolveDestination(createTripDto);
 
     const trip = await this.prisma.trip.create({
       data: {
-        turisId: createTripDto.turisId,
-        startDate,
-        endDate,
-        destination,
+        ...createTripDto,
+        startDate: new Date(createTripDto.startDate),
+        endDate: new Date(createTripDto.endDate),
+        ownerId,
+        currentBookings: 0
       },
       include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
-          }
+        owner: {
+          select: { email: true, role: true }
         }
       }
     });
@@ -139,219 +41,418 @@ export class TripsService {
     );
   }
 
-  async createTripTuris(userId: string, createTripDto: CreateTripTurisDto) {
-    const user = await this.prisma.user.findUnique({ where: { id: userId } });
-    
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    if (user.role !== 'turis') {
-      throw new ForbiddenException('Only turis can create trips for themselves');
-    }
-
-    const startDate = this.parseUtcIso(createTripDto.startDate, 'startDate');
-    const endDate = this.parseUtcIso(createTripDto.endDate, 'endDate');
-    if (startDate > endDate) {
-      throw new BadRequestException('startDate must be before or equal to endDate');
-    }
-
-    const conflictingTrip = await this.prisma.trip.findFirst({
-      where: {
-        turisId: userId,
-        OR: [
-          {
-            startDate: { lte: endDate },
-            endDate: { gte: startDate },
-          },
-        ],
-      },
+  async updateTrip(tripId: string, updateTripDto: UpdateTripDto, ownerId: string) {
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { role: true }
     });
 
-    if (conflictingTrip) {
-      throw new BadRequestException(`Trip conflicts with an existing trip (ID: ${conflictingTrip.id})`);
+    if (!owner || owner.role !== 'owner') {
+      throw new ForbiddenException('Only owners can update trips');
     }
 
-    const destination = this.resolveDestination(createTripDto);
+    const existingTrip = await this.prisma.trip.findFirst({
+      where: { id: tripId, ownerId }
+    });
 
-    const trip = await this.prisma.trip.create({
+    if (!existingTrip) {
+      throw new NotFoundException('Trip not found or you do not have permission to update it');
+    }
+
+    const updatedTrip = await this.prisma.trip.update({
+      where: { id: tripId },
       data: {
-        turisId: userId,
-        startDate,
-        endDate,
-        destination,
+        ...updateTripDto,
+        ...(updateTripDto.startDate && { startDate: new Date(updateTripDto.startDate) }),
+        ...(updateTripDto.endDate && { endDate: new Date(updateTripDto.endDate) })
       },
       include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
+        owner: {
+          select: { email: true, role: true }
+        },
+        bookings: {
+          include: {
+            user: {
+              select: { email: true, role: true }
+            }
           }
         }
       }
+    });
+
+    return ResponseHelper.success(
+      updatedTrip,
+      'Trip updated successfully'
+    );
+  }
+
+  async deleteTrip(tripId: string, ownerId: string) {
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { role: true }
+    });
+
+    if (!owner || owner.role !== 'owner') {
+      throw new ForbiddenException('Only owners can delete trips');
+    }
+
+    const existingTrip = await this.prisma.trip.findFirst({
+      where: { id: tripId, ownerId }
+    });
+
+    if (!existingTrip) {
+      throw new NotFoundException('Trip not found or you do not have permission to delete it');
+    }
+
+    const activeBookings = await this.prisma.booking.count({
+      where: { tripId, status: { in: ['pending', 'confirmed'] } }
+    });
+
+    if (activeBookings > 0) {
+      throw new BadRequestException('Cannot delete trip with active bookings');
+    }
+
+    await this.prisma.trip.delete({
+      where: { id: tripId }
+    });
+
+    return ResponseHelper.success(
+      { message: 'Trip deleted successfully' },
+      'Trip deleted successfully'
+    );
+  }
+
+  async getAllTripsForOwner(ownerId: string, page: number = 1, limit: number = 10) {
+    const owner = await this.prisma.user.findUnique({
+      where: { id: ownerId },
+      select: { role: true }
+    });
+
+    if (!owner || owner.role !== 'owner') {
+      throw new ForbiddenException('Only owners can view all trips');
+    }
+
+    const skip = (page - 1) * limit;
+    const total = await this.prisma.trip.count({ where: { ownerId } });
+
+    const trips = await this.prisma.trip.findMany({
+      where: { ownerId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        owner: {
+          select: { email: true, role: true }
+        },
+        bookings: {
+          include: {
+            user: {
+              select: { email: true, role: true }
+            }
+          }
+        }
+      }
+    });
+
+    const meta = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1,
+      nextPage: page < Math.ceil(total / limit) ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null,
+    };
+
+    return ResponseHelper.success(
+      trips,
+      'Trips retrieved successfully',
+      200,
+      meta
+    );
+  }
+
+  async getAvailableTrips(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const total = await this.prisma.trip.count({
+      where: { 
+        status: 'active',
+        currentBookings: { lt: this.prisma.trip.fields.maxCapacity }
+      }
+    });
+
+    const trips = await this.prisma.trip.findMany({
+      where: { 
+        status: 'active',
+        currentBookings: { lt: this.prisma.trip.fields.maxCapacity }
+      },
+      skip,
+      take: limit,
+      orderBy: { startDate: 'asc' },
+      include: {
+        owner: {
+          select: { email: true, role: true }
+        }
+      }
+    });
+
+    const meta = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1,
+      nextPage: page < Math.ceil(total / limit) ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null,
+    };
+
+    return ResponseHelper.success(
+      trips,
+      'Available trips retrieved successfully',
+      200,
+      meta
+    );
+  }
+
+  async getTripById(tripId: string) {
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: tripId },
+      include: {
+        owner: {
+          select: { email: true, role: true }
+        },
+        bookings: {
+          include: {
+            user: {
+              select: { email: true, role: true }
+            }
+          }
+        }
+      }
+    });
+
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    return ResponseHelper.success(
+      trip,
+      'Trip retrieved successfully'
+    );
+  }
+
+  async createBooking(createBookingDto: CreateBookingDto, userId: string) {
+    const trip = await this.prisma.trip.findUnique({
+      where: { id: createBookingDto.tripId }
+    });
+
+    if (!trip) {
+      throw new NotFoundException('Trip not found');
+    }
+
+    if (trip.status !== 'active') {
+      throw new BadRequestException('Trip is not available for booking');
+    }
+
+    if (trip.currentBookings >= trip.maxCapacity) {
+      throw new BadRequestException('Trip is fully booked');
+    }
+
+    const existingBooking = await this.prisma.booking.findUnique({
+      where: { tripId_userId: { tripId: createBookingDto.tripId, userId } }
+    });
+
+    if (existingBooking) {
+      throw new BadRequestException('You already have a booking for this trip');
+    }
+
+    const booking = await this.prisma.booking.create({
+      data: {
+        tripId: createBookingDto.tripId,
+        userId,
+        notes: createBookingDto.notes
+      },
+      include: {
+        trip: {
+          select: { title: true, destination: true, startDate: true, endDate: true }
+        },
+        user: {
+          select: { email: true, role: true }
+        }
+      }
+    });
+
+    await this.prisma.trip.update({
+      where: { id: createBookingDto.tripId },
+      data: { currentBookings: { increment: 1 } }
     });
 
     return ResponseHelper.created(
-      trip,
-      'Trip created successfully by turis'
+      booking,
+      'Booking created successfully'
     );
   }
 
-  async updateTripPegawai(tripId: string, updateTripDto: UpdateTripDto) {
-    const trip = await this.prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { turis: true },
+  async updateBooking(bookingId: string, updateBookingDto: UpdateBookingDto, userId: string, userRole: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { trip: true }
     });
 
-    if (!trip) throw new NotFoundException('Trip not found');
-
-    const data: any = {};
-    if (typeof updateTripDto.startDate === 'string') {
-      data.startDate = this.parseUtcIso(updateTripDto.startDate, 'startDate');
-    }
-    if (typeof updateTripDto.endDate === 'string') {
-      data.endDate = this.parseUtcIso(updateTripDto.endDate, 'endDate');
-    }
-    if (updateTripDto.destination !== undefined || updateTripDto.destinationObj !== undefined) {
-      data.destination = this.resolveDestination(updateTripDto as any);
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
     }
 
-    if (data.startDate && data.endDate && data.startDate > data.endDate) {
-      throw new BadRequestException('startDate must be before or equal to endDate');
+    if (userRole !== 'owner' && userRole !== 'pegawai' && booking.userId !== userId) {
+      throw new ForbiddenException('You can only update your own bookings');
     }
 
-    const updatedTrip = await this.prisma.trip.update({
-      where: { id: tripId },
-      data,
+    if (updateBookingDto.status === 'cancelled' && booking.status !== 'cancelled') {
+      await this.prisma.trip.update({
+        where: { id: booking.tripId },
+        data: { currentBookings: { decrement: 1 } }
+      });
+    }
+
+    if (updateBookingDto.status === 'confirmed' && booking.status === 'cancelled') {
+      await this.prisma.trip.update({
+        where: { id: booking.tripId },
+        data: { currentBookings: { increment: 1 } }
+      });
+    }
+
+    const updatedBooking = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: updateBookingDto,
       include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
-          }
+        trip: {
+          select: { title: true, destination: true, startDate: true, endDate: true }
+        },
+        user: {
+          select: { email: true, role: true }
         }
       }
     });
 
     return ResponseHelper.success(
-      updatedTrip,
-      'Trip updated successfully by pegawai'
+      updatedBooking,
+      'Booking updated successfully'
     );
   }
 
-  async updateTripTuris(tripId: string, updateTripDto: UpdateTripDto, userId: string) {
-    const trip = await this.prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { turis: true },
+  async cancelBooking(bookingId: string, userId: string, userRole: string) {
+    const booking = await this.prisma.booking.findUnique({
+      where: { id: bookingId },
+      include: { trip: true }
     });
 
-    if (!trip) throw new NotFoundException('Trip not found');
-
-    if (trip.turisId !== userId) {
-      throw new ForbiddenException('You can only update your own trips');
+    if (!booking) {
+      throw new NotFoundException('Booking not found');
     }
 
-    const data: any = {};
-    if (typeof updateTripDto.startDate === 'string') {
-      data.startDate = this.parseUtcIso(updateTripDto.startDate, 'startDate');
-    }
-    if (typeof updateTripDto.endDate === 'string') {
-      data.endDate = this.parseUtcIso(updateTripDto.endDate, 'endDate');
-    }
-    if (updateTripDto.destination !== undefined || updateTripDto.destinationObj !== undefined) {
-      data.destination = this.resolveDestination(updateTripDto as any);
+    if (userRole !== 'owner' && userRole !== 'pegawai' && booking.userId !== userId) {
+      throw new ForbiddenException('You can only cancel your own bookings');
     }
 
-    if (data.startDate && data.endDate && data.startDate > data.endDate) {
-      throw new BadRequestException('startDate must be before or equal to endDate');
+    if (booking.status === 'cancelled') {
+      throw new BadRequestException('Booking is already cancelled');
     }
 
-    const updatedTrip = await this.prisma.trip.update({
-      where: { id: tripId },
-      data,
+    const updatedBooking = await this.prisma.booking.update({
+      where: { id: bookingId },
+      data: { status: 'cancelled' },
       include: {
-        turis: {
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            phone: true
-          }
+        trip: {
+          select: { title: true, destination: true, startDate: true, endDate: true }
+        },
+        user: {
+          select: { email: true, role: true }
         }
       }
     });
 
-    return ResponseHelper.success(
-      updatedTrip,
-      'Trip updated successfully by turis'
-    );
-  }
-
-  async removeTripPegawai(tripId: string) {
-    const trip = await this.prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { turis: true },
+    await this.prisma.trip.update({
+      where: { id: booking.tripId },
+      data: { currentBookings: { decrement: 1 } }
     });
 
-    if (!trip) throw new NotFoundException('Trip not found');
-
-    await this.prisma.trip.delete({ where: { id: tripId } });
-
     return ResponseHelper.success(
-      { message: 'Trip deleted successfully' },
-      'Trip deleted successfully by pegawai'
+      updatedBooking,
+      'Booking cancelled successfully'
     );
   }
 
-  async removeTripTuris(tripId: string, userId: string) {
-    const trip = await this.prisma.trip.findUnique({
-      where: { id: tripId },
-      include: { turis: true },
+  async getUserBookings(userId: string, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const total = await this.prisma.booking.count({ where: { userId } });
+
+    const bookings = await this.prisma.booking.findMany({
+      where: { userId },
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        trip: {
+          select: { title: true, destination: true, startDate: true, endDate: true, price: true }
+        }
+      }
     });
 
-    if (!trip) throw new NotFoundException('Trip not found');
-
-    if (trip.turisId !== userId) {
-      throw new ForbiddenException('You can only delete your own trips');
-    }
-
-    await this.prisma.trip.delete({ where: { id: tripId } });
+    const meta = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1,
+      nextPage: page < Math.ceil(total / limit) ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null,
+    };
 
     return ResponseHelper.success(
-      { message: 'Trip deleted successfully' },
-      'Trip deleted successfully by turis'
+      bookings,
+      'User bookings retrieved successfully',
+      200,
+      meta
     );
   }
 
+  async getAllBookingsForPegawai(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const total = await this.prisma.booking.count();
 
+    const bookings = await this.prisma.booking.findMany({
+      skip,
+      take: limit,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        trip: {
+          select: { title: true, destination: true, startDate: true, endDate: true, price: true }
+        },
+        user: {
+          select: { email: true, role: true, phone: true }
+        }
+      }
+    });
 
-  private parseUtcIso(value: string, field: string): Date {
-    const isoPattern = /Z|[+-]00:00$/;
-    if (!isoPattern.test(value)) {
-      throw new BadRequestException(`${field} must be an ISO 8601 UTC string (e.g., 2025-02-10T12:00:00Z)`);
-    }
-    const d = new Date(value);
-    if (isNaN(d.getTime())) {
-      throw new BadRequestException(`${field} must be a valid ISO 8601 date string`);
-    }
-    return d;
-  }
+    const meta = {
+      page,
+      limit,
+      total,
+      totalPages: Math.ceil(total / limit),
+      hasNextPage: page < Math.ceil(total / limit),
+      hasPrevPage: page > 1,
+      nextPage: page < Math.ceil(total / limit) ? page + 1 : null,
+      prevPage: page > 1 ? page - 1 : null,
+    };
 
-  private resolveDestination(dto: { destination?: any; destinationObj?: any }): any {
-    if (dto.destinationObj !== undefined) return dto.destinationObj;
-    if (dto.destination !== undefined) return dto.destination;
-    throw new BadRequestException('destination or destinationObj is required');
-  }
-
-  private destinationToText(dest: any): string {
-    if (typeof dest === 'string') return dest;
-    try {
-      return JSON.stringify(dest);
-    } catch {
-      return String(dest);
-    }
+    return ResponseHelper.success(
+      bookings,
+      'All bookings retrieved successfully',
+      200,
+      meta
+    );
   }
 }

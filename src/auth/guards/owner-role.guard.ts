@@ -27,11 +27,10 @@ export class OwnerRoleGuard implements CanActivate {
       throw new ForbiddenException('User role not found');
     }
 
-    // Owner can access everything, pegawai can access pegawai APIs
-    if (user.role === 'owner' || user.role === 'pegawai') {
+    if (user.role === 'owner') {
       return true;
     }
 
-    throw new ForbiddenException('Insufficient permissions. Owner or pegawai role required.');
+    throw new ForbiddenException('Insufficient permissions. Owner role required.');
   }
 } 

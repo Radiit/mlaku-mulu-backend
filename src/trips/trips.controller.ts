@@ -1,85 +1,108 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body, UseGuards, Request, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, Request, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { TripsService } from './trips.service';
+import { CreateTripDto } from './dto/create-trip.dto';
+import { UpdateTripDto } from './dto/update-trip.dto';
+import { CreateBookingDto } from './dto/create-booking.dto';
+import { UpdateBookingDto } from './dto/update-booking.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { CreateTripDto } from '../auth/dto/create-trip.dto';
-import { CreateTripTurisDto } from '../auth/dto/create-trip-turis.dto';
-import { UpdateTripDto } from '../auth/dto/update-trip.dto';
-import { PaginationDto } from '../common/dto/pagination.dto';
-import { ResponseHelper } from '../common/utils/response';
+import { OwnerRoleGuard } from '../auth/guards/owner-role.guard';
+import { OwnerRole } from '../common/decorators/owner-role.decorator';
 
 @Controller('trips')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class TripsController {
   constructor(private readonly tripsService: TripsService) {}
-
-  @Get()
-  @Roles('pegawai', 'owner')
-  async findAllTrips(@Query() paginationDto: PaginationDto) {
-      return await this.tripsService.findAllTrips(paginationDto);
-  }
   
-
-  @Get('me')
-  async findMyTrips(@Request() req, @Query() paginationDto: PaginationDto) {
-    return await this.tripsService.findTripByUser(req.user.userId, paginationDto);
+  @Get()
+  async getAvailableTrips(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number
+  ) {
+    return this.tripsService.getAvailableTrips(page, limit);
   }
 
-  @Post('pegawai')
-  @Roles('pegawai', 'owner')
-  async createTripPegawai(@Body() createTripDto: CreateTripDto) {
-    const trip = await this.tripsService.createTrip(createTripDto.turisId, createTripDto);
-    return ResponseHelper.created(
-      trip,
-      'Trip created successfully by pegawai'
-    );
+  @Get(':id')
+  async getTripById(@Param('id') id: string) {
+    return this.tripsService.getTripById(id);
   }
 
-  @Post('turis')
-  async createTripTuris(@Body() createTripDto: CreateTripTurisDto, @Request() req) {
-    const trip = await this.tripsService.createTripTuris(req.user.id, createTripDto);
-    return ResponseHelper.created(
-      trip,
-      'Trip created successfully by turis'
-    );
+  @Post()
+  @UseGuards(JwtAuthGuard, OwnerRoleGuard)
+  @OwnerRole()
+  async createTrip(@Body() createTripDto: CreateTripDto, @Request() req) {
+    return this.tripsService.createTrip(createTripDto, req.user.id);
   }
 
-  @Patch('pegawai/:id')
-  @Roles('pegawai', 'owner')
-  async updateTripPegawai(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
-    const trip = await this.tripsService.updateTripPegawai(id, updateTripDto);
-    return ResponseHelper.success(
-      trip,
-      'Trip updated successfully by pegawai'
-    );
+  @Patch(':id')
+  @UseGuards(JwtAuthGuard, OwnerRoleGuard)
+  @OwnerRole()
+  async updateTrip(
+    @Param('id') id: string,
+    @Body() updateTripDto: UpdateTripDto,
+    @Request() req
+  ) {
+    return this.tripsService.updateTrip(id, updateTripDto, req.user.id);
   }
 
-  @Patch('turis/:id')
-  async updateTripTuris(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto, @Request() req) {
-    const trip = await this.tripsService.updateTripTuris(id, updateTripDto, req.user.id);
-    return ResponseHelper.success(
-      trip,
-      'Trip updated successfully by turis'
-    );
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, OwnerRoleGuard)
+  @OwnerRole()
+  async deleteTrip(@Param('id') id: string, @Request() req) {
+    return this.tripsService.deleteTrip(id, req.user.id);
   }
 
-  @Delete('pegawai/:id')
-  @Roles('pegawai', 'owner')
-  async removeTripPegawai(@Param('id') id: string) {
-    const result = await this.tripsService.removeTripPegawai(id);
-    return ResponseHelper.success(
-      result,
-      'Trip deleted successfully by pegawai'
-    );
+  @Get('owner/all')
+  @UseGuards(JwtAuthGuard, OwnerRoleGuard)
+  @OwnerRole()
+  async getAllTripsForOwner(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Request() req
+  ) {
+    return this.tripsService.getAllTripsForOwner(req.user.id, page, limit);
   }
 
-  @Delete('turis/:id')
-  async removeTripTuris(@Param('id') id: string, @Request() req) {
-    const result = await this.tripsService.removeTripTuris(id, req.user.id);
-    return ResponseHelper.success(
-      result,
-      'Trip deleted successfully by turis'
-    );
+  @Post('book')
+  @UseGuards(JwtAuthGuard)
+  async createBooking(@Body() createBookingDto: CreateBookingDto, @Request() req) {
+    return this.tripsService.createBooking(createBookingDto, req.user.id);
+  }
+
+  @Patch('bookings/:id')
+  @UseGuards(JwtAuthGuard)
+  async updateBooking(
+    @Param('id') id: string,
+    @Body() updateBookingDto: UpdateBookingDto,
+    @Request() req
+  ) {
+    return this.tripsService.updateBooking(id, updateBookingDto, req.user.id, req.user.role);
+  }
+
+  @Delete('bookings/:id')
+  @UseGuards(JwtAuthGuard)
+  async cancelBooking(@Param('id') id: string, @Request() req) {
+    return this.tripsService.cancelBooking(id, req.user.id, req.user.role);
+  }
+
+  @Get('bookings/me')
+  @UseGuards(JwtAuthGuard)
+  async getUserBookings(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Request() req
+  ) {
+    return this.tripsService.getUserBookings(req.user.id, page, limit);
+  }
+
+  @Get('bookings/all')
+  @UseGuards(JwtAuthGuard)
+  async getAllBookingsForPegawai(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+    @Request() req
+  ) {
+    if (req.user.role !== 'pegawai' && req.user.role !== 'owner') {
+      throw new Error('Only pegawai and owner can view all bookings');
+    }
+    return this.tripsService.getAllBookingsForPegawai(page, limit);
   }
 }
