@@ -33,19 +33,42 @@ jobs:
           tags: ${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          platforms: linux/amd64
+
+      - name: List all Docker images
+        run: |
+          echo "🔍 Listing all Docker images..."
+          docker images -a
+          echo "📊 Docker system info:"
+          docker system df
 
       - name: Verify Docker image
         run: |
           echo "🔍 Verifying Docker image..."
-          docker images ${{ env.IMAGE_NAME }}:latest
-          docker inspect ${{ env.IMAGE_NAME }}:latest
+          if docker images | grep -q "${{ env.IMAGE_NAME }}"; then
+            echo "✅ Image found:"
+            docker images ${{ env.IMAGE_NAME }}:latest
+            echo "📋 Image details:"
+            docker inspect ${{ env.IMAGE_NAME }}:latest
+          else
+            echo "❌ Image not found. Available images:"
+            docker images
+            echo "🔍 Searching for similar images:"
+            docker images | grep -i mlaku || echo "No similar images found"
+            exit 1
+          fi
 
       - name: Save Docker image
         run: |
           echo "💾 Saving Docker image..."
-          docker save ${{ env.IMAGE_NAME }}:latest -o image.tar
-          ls -la image.tar
-          echo "✅ Image saved successfully"
+          if docker save ${{ env.IMAGE_NAME }}:latest -o image.tar; then
+            echo "✅ Image saved successfully"
+            ls -la image.tar
+            echo "📦 Image file size: $(du -h image.tar)"
+          else
+            echo "❌ Failed to save image"
+            exit 1
+          fi
 
       - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
@@ -160,7 +183,7 @@ jobs:
             fi
             
             # Verify image was loaded
-            if ! docker images | grep -q "${{ env.IMAGE_NAME }}"; then
+            if ! docker images | grep -q "${{ env.CONTAINER_NAME }}"; then
               echo "❌ Error: Image not found after loading"
               docker images
               exit 1
