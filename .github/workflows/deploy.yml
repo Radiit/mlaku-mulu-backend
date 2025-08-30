@@ -12,8 +12,8 @@ env:
   IMAGE_NAME: mlaku-mulu-backend
 
 jobs:
-  build-and-deploy:
-    name: Build & Deploy Docker Image to VPS
+  deploy:
+    name: Deploy to VPS
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,109 +21,6 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Verify build context
-        run: |
-          echo "🔍 Verifying build context..."
-          echo "📁 Current directory: $(pwd)"
-          echo "📋 Files in root:"
-          ls -la
-          echo "📋 Dockerfile exists:"
-          if [ -f "Dockerfile" ]; then
-            echo "✅ Dockerfile found"
-            echo "📄 Dockerfile content (first 10 lines):"
-            head -10 Dockerfile
-          else
-            echo "❌ Dockerfile not found"
-            exit 1
-          fi
-          echo "📋 Package.json exists:"
-          if [ -f "package.json" ]; then
-            echo "✅ Package.json found"
-            echo "📄 Build script:"
-            grep -A 1 '"build"' package.json
-          else
-            echo "❌ Package.json not found"
-            exit 1
-          fi
-
-      - name: Clean up existing Docker images
-        run: |
-          echo "🧹 Cleaning up existing Docker images..."
-          docker system prune -f
-          docker images | grep -E "(${{ env.IMAGE_NAME }}|none)" | awk '{print $3}' | xargs -r docker rmi -f || true
-          echo "✅ Cleanup completed"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build Docker image with force
-        run: |
-          echo "🔨 Building Docker image with force..."
-          docker build --no-cache --force-rm -t ${{ env.IMAGE_NAME }}:latest .
-          if [ $? -eq 0 ]; then
-            echo "✅ Docker build completed successfully"
-          else
-            echo "❌ Docker build failed"
-            exit 1
-          fi
-
-      - name: List all Docker images
-        run: |
-          echo "🔍 Listing all Docker images..."
-          docker images -a
-          echo "📊 Docker system info:"
-          docker system df
-
-      - name: Verify Docker image
-        run: |
-          echo "🔍 Verifying Docker image..."
-          if docker images | grep -q "${{ env.IMAGE_NAME }}"; then
-            echo "✅ Image found:"
-            docker images ${{ env.IMAGE_NAME }}:latest
-            echo "📋 Image details:"
-            docker inspect ${{ env.IMAGE_NAME }}:latest
-          else
-            echo "❌ Image not found. Available images:"
-            docker images
-            echo "🔍 Searching for similar images:"
-            docker images | grep -i mlaku || echo "No similar images found"
-            echo "🔍 Recent Docker build history:"
-            docker history ${{ env.IMAGE_NAME }}:latest 2>/dev/null || echo "No build history found"
-            echo "❌ Build verification failed - exiting"
-            exit 1
-          fi
-
-      - name: Save Docker image
-        run: |
-          echo "💾 Saving Docker image..."
-          if docker save ${{ env.IMAGE_NAME }}:latest -o image.tar; then
-            echo "✅ Image saved successfully"
-            ls -la image.tar
-            echo "📦 Image file size: $(du -h image.tar)"
-          else
-            echo "❌ Failed to save image"
-            exit 1
-          fi
-
-      - name: Upload Docker image artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: docker-image
-          path: image.tar
-
-  deploy:
-    name: Deploy to VPS
-    runs-on: ubuntu-latest
-    needs: build-and-deploy
-    permissions:
-      contents: read
-
-    steps:
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: docker-image
 
       - name: Install SSH client
         run: |
@@ -173,66 +70,50 @@ jobs:
           echo "User: ${{ secrets.VPS_USER }}"
           echo "Path: ${{ secrets.VPS_PATH }}"
           
-          # Verify image file exists
-          if [ ! -f "image.tar" ]; then
-            echo "❌ Error: image.tar not found"
-            ls -la
-            exit 1
-          fi
-          
-          echo "📦 Image file size: $(du -h image.tar)"
-          
-          # Copy Docker image to VPS using password
-          echo "📦 Copying Docker image to VPS..."
-          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
-          
-          if [ $? -eq 0 ]; then
-            echo "✅ Docker image copied successfully"
-          else
-            echo "❌ Failed to copy Docker image to VPS"
-            exit 1
-          fi
-          
           # Deploy on VPS using password
           echo "🐳 Deploying container on VPS..."
           sshpass -p '${{ secrets.VPS_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd ${{ secrets.VPS_PATH }}
             
             echo "📁 Working directory: $(pwd)"
-            echo "📦 Verifying image file..."
             
-            # Check if image file exists and has content
-            if [ ! -f "image.tar" ]; then
-              echo "❌ Error: image.tar not found on VPS"
-              exit 1
+            # Clean up existing container and image
+            echo "🧹 Cleaning up existing resources..."
+            docker stop ${{ env.CONTAINER_NAME }} || echo "No existing container to stop"
+            docker rm ${{ env.CONTAINER_NAME }} || echo "No existing container to remove"
+            docker rmi ${{ env.IMAGE_NAME }}:latest || echo "No existing image to remove"
+            
+            # Remove existing repository if exists
+            if [ -d "mlaku-mulu-backend" ]; then
+              echo "🗑️ Removing existing repository..."
+              rm -rf mlaku-mulu-backend
             fi
             
-            echo "📦 Image file size: $(du -h image.tar)"
+            # Clone fresh repository
+            echo "📥 Cloning fresh repository..."
+            git clone https://github.com/Radiit/mlaku-mulu-backend.git
+            cd mlaku-mulu-backend
             
-            echo "📦 Loading Docker image..."
-            # Load Docker image with error handling
-            if docker load < image.tar; then
-              echo "✅ Docker image loaded successfully"
+            echo "📋 Repository cloned successfully"
+            echo "📁 Current directory: $(pwd)"
+            echo "📋 Files in repository:"
+            ls -la
+            
+            # Build Docker image on VPS
+            echo "🔨 Building Docker image on VPS..."
+            if docker build --no-cache --force-rm -t ${{ env.IMAGE_NAME }}:latest .; then
+              echo "✅ Docker image built successfully on VPS"
             else
-              echo "❌ Failed to load Docker image"
+              echo "❌ Failed to build Docker image on VPS"
               exit 1
             fi
             
-            # Verify image was loaded
-            if ! docker images | grep -q "${{ env.CONTAINER_NAME }}"; then
-              echo "❌ Error: Image not found after loading"
+            # Verify image was built
+            if ! docker images | grep -q "${{ env.IMAGE_NAME }}"; then
+              echo "❌ Error: Image not found after building"
               docker images
               exit 1
             fi
-            
-            echo "🔄 Stopping existing container..."
-            # Stop and remove existing container
-            docker stop ${{ env.CONTAINER_NAME }} || echo "No existing container to stop"
-            docker rm ${{ env.CONTAINER_NAME }} || echo "No existing container to remove"
-            
-            echo "🗑️ Removing old image..."
-            # Remove old image
-            docker rmi ${{ env.IMAGE_NAME }}:latest || echo "No old image to remove"
             
             echo "🚀 Starting new container..."
             # Run new container
@@ -257,10 +138,6 @@ jobs:
               echo "❌ Failed to start container"
               exit 1
             fi
-            
-            echo "🧹 Cleaning up..."
-            # Clean up
-            rm -f image.tar
             
             echo "⏳ Waiting for container to start..."
             # Wait for container to start
@@ -290,6 +167,12 @@ jobs:
               docker ps -a
               exit 1
             fi
+            
+            # Clean up repository (optional - keep for debugging)
+            echo "🧹 Cleaning up repository..."
+            cd ..
+            rm -rf mlaku-mulu-backend
+            echo "✅ Repository cleanup completed"
           EOF
 
       - name: Verify deployment
