@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
-import { UpdateUserDto } from "src/auth/dto/update-user.dto";
-import { PrismaService } from "src/prisma/prisma.service";
+import { UpdateUserDto } from "../auth/dto/update-user.dto";
+import { PrismaService } from "../prisma/prisma.service";
 import { PaginationDto } from "../common/dto/pagination.dto";
 import { PaginationHelper } from "../common/utils/pagination";
 import { ResponseHelper } from "../common/utils/response";

@@ -16,7 +16,14 @@ describe('AppController', () => {
 
   describe('root', () => {
     it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+      const result = appController.getHello();
+      expect(result).toEqual({
+        statusCode: 200,
+        message: 'Hello World!',
+        data: { message: 'Hello World!' },
+        meta: undefined,
+        validationErrors: [],
+      });
     });
   });
 });
