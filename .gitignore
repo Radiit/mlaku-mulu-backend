@@ -46,6 +46,10 @@ lerna-debug.log*
 .temp
 .tmp
 
+# Postman collections (may contain sensitive data)
+*.postman_collection.json
+postman.json
+
 # Runtime data
 pids
 *.pid
