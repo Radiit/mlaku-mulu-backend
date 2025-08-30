@@ -61,33 +61,81 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y openssh-client
 
+      - name: Validate VPS secrets
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "❌ Error: VPS_HOST secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "❌ Error: VPS_USER secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_PASSWORD }}" ]; then
+            echo "❌ Error: VPS_PASSWORD secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.VPS_PATH }}" ]; then
+            echo "❌ Error: VPS_PATH secret is not set"
+            exit 1
+          fi
+          echo "✅ All VPS secrets are configured"
+          echo "Host: ${{ secrets.VPS_HOST }}"
+          echo "User: ${{ secrets.VPS_USER }}"
+          echo "Path: ${{ secrets.VPS_PATH }}"
+
       - name: Add VPS to known hosts
         run: |
           mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          echo "Adding ${{ secrets.VPS_HOST }} to known hosts..."
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts || {
+            echo "❌ Failed to add VPS to known hosts"
+            exit 1
+          }
+          echo "✅ VPS added to known hosts successfully"
 
       - name: Deploy to VPS using password
         run: |
           # Install sshpass for password authentication
           sudo apt-get install -y sshpass
           
+          echo "🚀 Starting deployment to VPS..."
+          echo "Host: ${{ secrets.VPS_HOST }}"
+          echo "User: ${{ secrets.VPS_USER }}"
+          echo "Path: ${{ secrets.VPS_PATH }}"
+          
           # Copy Docker image to VPS using password
+          echo "📦 Copying Docker image to VPS..."
           sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar.gz ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
           
+          if [ $? -eq 0 ]; then
+            echo "✅ Docker image copied successfully"
+          else
+            echo "❌ Failed to copy Docker image to VPS"
+            exit 1
+          fi
+          
           # Deploy on VPS using password
+          echo "🐳 Deploying container on VPS..."
           sshpass -p '${{ secrets.VPS_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
             cd ${{ secrets.VPS_PATH }}
+            
+            echo "📁 Working directory: $(pwd)"
+            echo "📦 Loading Docker image..."
             
             # Load Docker image
             docker load < image.tar.gz
             
+            echo "🔄 Stopping existing container..."
             # Stop and remove existing container
             docker stop ${{ env.CONTAINER_NAME }} || true
             docker rm ${{ env.CONTAINER_NAME }} || true
             
+            echo "🗑️ Removing old image..."
             # Remove old image
             docker rmi ${{ env.IMAGE_NAME }}:latest || true
             
+            echo "🚀 Starting new container..."
             # Run new container
             docker run -d \
               --name ${{ env.CONTAINER_NAME }} \
@@ -104,12 +152,15 @@ jobs:
               -e SMTP_FROM="${{ secrets.SMTP_FROM }}" \
               ${{ env.IMAGE_NAME }}:latest
             
+            echo "🧹 Cleaning up..."
             # Clean up
             rm -f image.tar.gz
             
+            echo "⏳ Waiting for container to start..."
             # Wait for container to start
             sleep 10
             
+            echo "🏥 Running health check..."
             # Health check
             if curl -f http://localhost:8086/health; then
               echo "✅ Deployment successful! Container is healthy."
@@ -121,8 +172,9 @@ jobs:
 
       - name: Verify deployment
         run: |
-          echo "Waiting for deployment to be ready..."
+          echo "⏳ Waiting for deployment to be ready..."
           sleep 30
+          echo "🔍 Verifying deployment at http://${{ secrets.VPS_HOST }}:8086/health"
           if curl -f http://${{ secrets.VPS_HOST }}:8086/health; then
             echo "✅ VPS deployment verified successfully!"
           else
