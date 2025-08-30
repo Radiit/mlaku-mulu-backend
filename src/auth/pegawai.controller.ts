@@ -46,22 +46,18 @@ export class PegawaiController {
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
   ) {
-    const paginationDto = { page, limit };
-    return this.tripsService.findAllTrips(paginationDto);
+    return this.tripsService.getAvailableTrips(page, limit);
   }
 
   @Get('trips/:id')
   @OwnerRole()
   async getTripById(@Param('id') tripId: string) {
-    // This would need to be implemented in TripsService
-    // For now, we'll return a placeholder
-    return { message: 'Trip details endpoint - to be implemented' };
+    return this.tripsService.getTripById(tripId);
   }
 
   @Get('dashboard')
   @OwnerRole()
   async getDashboard(@Request() req) {
-    // Dashboard data for pegawai
     const user = req.user;
     return {
       message: 'Dashboard data retrieved successfully',
