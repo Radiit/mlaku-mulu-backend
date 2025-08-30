@@ -15,7 +15,7 @@ export class TripsController {
   constructor(private readonly tripsService: TripsService) {}
 
   @Get()
-  @Roles('pegawai')
+  @Roles('pegawai', 'owner')
   async findAllTrips(@Query() paginationDto: PaginationDto) {
       return await this.tripsService.findAllTrips(paginationDto);
   }
@@ -27,7 +27,7 @@ export class TripsController {
   }
 
   @Post('pegawai')
-  @Roles('pegawai')
+  @Roles('pegawai', 'owner')
   async createTripPegawai(@Body() createTripDto: CreateTripDto) {
     const trip = await this.tripsService.createTrip(createTripDto.turisId, createTripDto);
     return ResponseHelper.created(
@@ -46,7 +46,7 @@ export class TripsController {
   }
 
   @Patch('pegawai/:id')
-  @Roles('pegawai')
+  @Roles('pegawai', 'owner')
   async updateTripPegawai(@Param('id') id: string, @Body() updateTripDto: UpdateTripDto) {
     const trip = await this.tripsService.updateTripPegawai(id, updateTripDto);
     return ResponseHelper.success(
@@ -65,7 +65,7 @@ export class TripsController {
   }
 
   @Delete('pegawai/:id')
-  @Roles('pegawai')
+  @Roles('pegawai', 'owner')
   async removeTripPegawai(@Param('id') id: string) {
     const result = await this.tripsService.removeTripPegawai(id);
     return ResponseHelper.success(

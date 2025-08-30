@@ -9,12 +9,16 @@ import { RefreshTokenGuard } from './guards/refresh-token.guard';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UsersModule } from '../users/users.module';
 import { EmailModule } from '../email/email.module';
+import { OwnerModule } from './owner.module';
+import { PegawaiModule } from './pegawai.module';
 
 @Module({
   imports: [
     PrismaModule,
     UsersModule,
     EmailModule,
+    OwnerModule,
+    PegawaiModule,
     PassportModule,
     JwtModule.register({
       secret: process.env.JWT_SECRET || 'default_secret',
