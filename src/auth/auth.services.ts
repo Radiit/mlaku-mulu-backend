@@ -3,6 +3,7 @@ import * as jwt from "@nestjs/jwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import * as bcrypt from 'bcrypt';
 import { EmailService } from '../email/email.service';
+import { ResponseHelper } from '../common/utils/response';
 
 @common.Injectable()
 export class AuthService {
@@ -53,7 +54,16 @@ export class AuthService {
     // Kirim verifikasi email
     await this.emailService.sendOtpEmail(email, otp);
     
-    return { message: 'User registered successfully. Please check your email for OTP verification.' };
+    return ResponseHelper.created(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        isVerified: user.isVerified,
+        phone: user.phone
+      },
+      'User registered successfully. Please check your email for OTP verification.'
+    );
   }
 
   // Verifikasi nomor telepon
@@ -82,7 +92,10 @@ export class AuthService {
         },
       });
 
-      return { message: 'Phone verified successfully. You can now login.' };
+      return ResponseHelper.success(
+        { userId: user.id, email: user.email },
+        'Phone verified successfully. You can now login.'
+      );
     } catch (error) {
       throw new common.UnauthorizedException('Invalid or expired OTP.');
     }
@@ -102,6 +115,9 @@ export class AuthService {
     const payload = { sub: user.id, role: user.role };
     const token = this.jwtService.sign(payload);
 
-    return { access_token: token };
+    return ResponseHelper.success(
+      { access_token: token },
+      'Login successful'
+    );
   }
 }
