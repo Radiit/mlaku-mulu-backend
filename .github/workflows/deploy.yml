@@ -1,14 +1,19 @@
-name: Deploy Node.js App to Azure
+name: Deploy Docker App to VPS
 
 on:
   push:
     branches:
       - master
+      - main
   workflow_dispatch:
 
+env:
+  CONTAINER_NAME: mlaku-mulu-backend
+  IMAGE_NAME: mlaku-mulu-backend
+
 jobs:
-  build:
-    name: Build & Test Application
+  build-and-deploy:
+    name: Build & Deploy Docker Image to VPS
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -17,77 +22,110 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
         with:
-          node-version: '18.x'
-          cache: 'npm'
+          context: .
+          push: false
+          tags: ${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Save Docker image
+        run: docker save ${{ env.IMAGE_NAME }}:latest | gzip > image.tar.gz
 
-      - name: Run ESLint (Ignore Errors)
-        run: npm run lint --if-present || true
-
-      - name: Run Tests (Ignore Errors)
-        run: npm run test --if-present || true
-
-      - name: Generate Prisma Client
-        run: npx prisma generate
-
-      - name: Apply Prisma Migrations (Safe)
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: |
-          npx prisma migrate deploy || npx prisma db push
-
-      - name: Build Application
-        run: npm run build --if-present
-
-      - name: Prepare Deployment Package
-        run: |
-          mkdir deploy-package
-          rsync -av --progress ./ deploy-package --exclude deploy-package --exclude node_modules --exclude .git --exclude .github --exclude .next --exclude prisma/migrations
-          zip -r release.zip deploy-package
-
-      - name: Upload Artifact
+      - name: Upload Docker image artifact
         uses: actions/upload-artifact@v4
         with:
-          name: node-app
-          path: release.zip
+          name: docker-image
+          path: image.tar.gz
 
   deploy:
-    name: Deploy to Azure Web App
+    name: Deploy to VPS
     runs-on: ubuntu-latest
-    needs: build
-    environment: Production
+    needs: build-and-deploy
     permissions:
-      id-token: write
       contents: read
 
     steps:
-      - name: Download Artifact
+      - name: Download Docker image artifact
         uses: actions/download-artifact@v4
         with:
-          name: node-app
+          name: docker-image
 
-      - name: Unzip Artifact
-        run: unzip release.zip
+      - name: Install SSH client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client
 
-      - name: List Files Before Deployment
-        run: ls -la
+      - name: Add VPS to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: Login to Azure
-        uses: azure/login@v2
-        with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID }}
-          client-secret: ${{ secrets.AZUREAPPSERVICE_SECRET }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID }}
+      - name: Deploy to VPS using password
+        run: |
+          # Install sshpass for password authentication
+          sudo apt-get install -y sshpass
+          
+          # Copy Docker image to VPS using password
+          sshpass -p '${{ secrets.VPS_PASSWORD }}' scp -o StrictHostKeyChecking=no image.tar.gz ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }}:${{ secrets.VPS_PATH }}/
+          
+          # Deploy on VPS using password
+          sshpass -p '${{ secrets.VPS_PASSWORD }}' ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} << 'EOF'
+            cd ${{ secrets.VPS_PATH }}
+            
+            # Load Docker image
+            docker load < image.tar.gz
+            
+            # Stop and remove existing container
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+            
+            # Remove old image
+            docker rmi ${{ env.IMAGE_NAME }}:latest || true
+            
+            # Run new container
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --restart unless-stopped \
+              -p 8086:8086 \
+              -e NODE_ENV=production \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e JWT_REFRESH_SECRET="${{ secrets.JWT_REFRESH_SECRET }}" \
+              -e SMTP_HOST="${{ secrets.SMTP_HOST }}" \
+              -e SMTP_PORT="${{ secrets.SMTP_PORT }}" \
+              -e SMTP_USER="${{ secrets.SMTP_USER }}" \
+              -e SMTP_PASS="${{ secrets.SMTP_PASS }}" \
+              -e SMTP_FROM="${{ secrets.SMTP_FROM }}" \
+              ${{ env.IMAGE_NAME }}:latest
+            
+            # Clean up
+            rm -f image.tar.gz
+            
+            # Wait for container to start
+            sleep 10
+            
+            # Health check
+            if curl -f http://localhost:8086/health; then
+              echo "✅ Deployment successful! Container is healthy."
+            else
+              echo "❌ Health check failed. Container may still be starting."
+              docker logs ${{ env.CONTAINER_NAME }} --tail 20
+            fi
+          EOF
 
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'mlaku-mulu-backend'
-          slot-name: 'Production'
-          package: release.zip
+      - name: Verify deployment
+        run: |
+          echo "Waiting for deployment to be ready..."
+          sleep 30
+          if curl -f http://${{ secrets.VPS_HOST }}:8086/health; then
+            echo "✅ VPS deployment verified successfully!"
+          else
+            echo "❌ VPS deployment verification failed"
+            exit 1
+          fi
