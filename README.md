@@ -22,6 +22,14 @@
   
 </div>
 
+## 🌍 Live Demo
+
+<div align="center">
+
+[🌍 **View Website Demo**](http://mlaku-mulu.surge.sh/)
+
+</div>
+
 ---
 
 ## 🎯 **Project Overview**
