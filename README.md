@@ -248,6 +248,74 @@ The application automatically:
 
 ## 🧪 **Testing**
 
+### **Test Accounts**
+
+The system comes with pre-seeded dummy accounts for testing different user roles:
+
+#### **👑 Owner Account**
+```
+Email: admin@mlakumulu.com
+Password: Owner123
+Role: owner
+Access: Full system access
+```
+
+#### **👨‍💼 Staff Accounts**
+```
+Email: pegawai1@mlakumulu.com
+Password: Pegawai123
+Role: pegawai
+Access: Staff management features
+
+Email: pegawai2@mlaku-mulu.com
+Password: Pegawai123
+Role: pegawai
+Access: Staff management features
+
+Email: pegawai3@mlaku-mulu.com
+Password: Pegawai123
+Role: pegawai
+Access: Staff management features
+```
+
+#### **🧳 Traveler Accounts**
+```
+Email: turis1@example.com
+Password: Turis123
+Role: turis
+Access: Personal trip booking
+
+Email: turis2@example.com
+Password: Turis123
+Role: turis
+Access: Personal trip booking
+
+Email: turis3@example.com
+Password: Turis123
+Role: turis
+Access: Personal trip booking
+```
+
+#### **⏳ Unverified Accounts (for OTP testing)**
+```
+Email: pending1@example.com
+Password: Pending123
+Role: turis
+Status: Unverified (requires OTP)
+
+Email: pending2@example.com
+Password: Pending123
+Role: pegawai
+Status: Unverified (requires OTP)
+```
+
+### **Testing Scenarios**
+
+1. **Owner Testing**: Use `admin@mlakumulu.com` to test full system access
+2. **Staff Testing**: Use any pegawai account to test staff features
+3. **Traveler Testing**: Use any turis account to test booking features
+4. **OTP Testing**: Use pending accounts to test email verification flow
+
 ### **Test Structure**
 
 ```
@@ -272,26 +340,4 @@ npm run test:cov
 
 # Watch mode
 npm run test:watch
-```
-
-## 🚀 **Deployment**
-
-### **Production Considerations**
-
-- Use `npm run start:with-db` for automatic database setup
-- Ensure environment variables are properly configured
-- Use reverse proxy (Nginx) for production
-- Implement proper logging and monitoring
-- Set up SSL/TLS certificates
-
-### **Environment-Specific Configs**
-
-```bash
-# Development
-NODE_ENV=development
-PORT=3000
-
-# Production
-NODE_ENV=production
-PORT=8086
 ```
